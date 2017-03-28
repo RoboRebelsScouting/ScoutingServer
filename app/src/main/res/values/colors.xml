@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#F57C00</color>
+    <color name="colorPrimaryDark">#EF6C00</color>
+    <color name="colorAccent">#1565C0</color>
+
+    <color name="colorAllianceRed">#F44336</color>
+    <color name="colorAllianceBlue">#1976D2</color>
+
+    <item name="colorTextPrimary" type="color">#DE000000</item>
+    <item name="colorTextPrimaryInverse" type="color">#FFFFFF</item>
+    <item name="colorTextSecondary" type="color">#8A000000</item>
+    <item name="colorTextSecondaryInverse" type="color">#46FFFFFF</item>
+    <item name="colorDivider" type="color">#1F000000</item>
+</resources>

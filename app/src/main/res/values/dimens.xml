@@ -1,0 +1,29 @@
+<resources>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="subheader_horizontal_margin">16dp</dimen>
+    <dimen name="subheader_height">48dp</dimen>
+
+    <dimen name="list_card_height">240dp</dimen>
+    <dimen name="list_card_margin">16dp</dimen>
+    <dimen name="list_card_padding">16dp</dimen>
+
+    <dimen name="ic_button_padding">16dp</dimen>
+    <dimen name="ic_button_size">56dp</dimen>
+
+    <dimen name="text_large">50sp</dimen>
+    <dimen name="text_primary">16sp</dimen>
+    <dimen name="text_secondary">14sp</dimen>
+
+    <dimen name="list_content_area_margin_vertical">8dp</dimen>
+    <dimen name="list_content_area_divider_height">1dp</dimen>
+    <dimen name="list_content_area_divider_margin_start">72dp</dimen>
+    <dimen name="list_item_height">72dp</dimen>
+    <dimen name="list_item_height_dense">48dp</dimen>
+    <dimen name="list_item_padding_horizontal">16dp</dimen>
+    <dimen name="list_item_content_padding_horizontal">72dp</dimen>
+    <dimen name="list_item_padding_horizontal_dialog">24dp</dimen>
+    <dimen name="list_icon_size">24dp</dimen>
+    <dimen name="list_content_margin_start">56dp</dimen>
+</resources>

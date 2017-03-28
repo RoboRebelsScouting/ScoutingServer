@@ -1,0 +1,134 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Primary" parent="@android:style/TextAppearance">
+        <item name="android:textSize">@dimen/text_primary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Primary.Inverse" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/colorTextPrimaryInverse</item>
+    </style>
+
+    <style name="TextAppearance.Secondary" parent="@android:style/TextAppearance">
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
+    </style>
+
+    <style name="TextAppearance.Large" parent="@android:style/TextAppearance">
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+    <style name="TileButton" parent="@style/Widget.AppCompat.Button.Borderless">
+
+    </style>
+
+    <style name="List">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/list_content_area_margin_vertical</item>
+        <item name="android:layout_marginBottom">@dimen/list_content_area_margin_vertical</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="List.ContentAreaDivider">
+        <item name="android:layout_height">@dimen/list_content_area_divider_height</item>
+        <item name="android:layout_marginTop">@dimen/list_content_area_margin_vertical</item>
+        <item name="android:layout_marginBottom">@dimen/list_content_area_margin_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/list_content_area_divider_margin_start</item>
+        <item name="android:background">@color/colorDivider</item>
+    </style>
+
+    <style name="List.Item">
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:minHeight">@dimen/list_item_height</item>
+        <item name="android:paddingLeft">@dimen/list_item_padding_horizontal</item>
+        <item name="android:paddingRight">@dimen/list_item_padding_horizontal</item>
+    </style>
+
+    <style name="List.ItemContent" parent="List.Item">
+        <item name="android:paddingLeft">@dimen/list_item_content_padding_horizontal</item>
+        <item name="android:paddingRight">@dimen/list_item_padding_horizontal</item>
+    </style>
+
+    <style name="List.Item.Dense">
+        <item name="android:minHeight">@dimen/list_item_height_dense</item>
+    </style>
+
+    <style name="List.Item.Dense.TextView">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textAppearance">@style/TextAppearance.Primary</item>
+    </style>
+
+    <style name="List.Item.Dense.TextView.Margin">
+        <item name="android:paddingLeft">@dimen/list_item_content_padding_horizontal</item>
+    </style>
+
+    <style name="List.Item.Dialog">
+        <item name="android:paddingLeft">@dimen/list_item_padding_horizontal_dialog</item>
+        <item name="android:paddingRight">@dimen/list_item_padding_horizontal_dialog</item>
+    </style>
+
+    <style name="List.Item.Dialog.Dense">
+        <item name="android:minHeight">@dimen/list_item_height_dense</item>
+    </style>
+
+    <style name="List.Icon">
+        <item name="android:layout_width">@dimen/list_icon_size</item>
+        <item name="android:layout_height">@dimen/list_icon_size</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="List.Content">
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/list_content_margin_start</item>
+    </style>
+
+    <style name="List.Content.NoMargin">
+        <item name="android:layout_marginLeft">0dp</item>
+    </style>
+
+    <style name="List.Text">
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="List.Text.Primary">
+        <item name="android:textAppearance">@style/TextAppearance.Primary</item>
+    </style>
+
+    <style name="List.Text.Secondary">
+        <item name="android:textAppearance">@style/TextAppearance.Secondary</item>
+    </style>
+
+    <style name="Text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="Text.Large">
+        <item name="android:textAppearance">@style/TextAppearance.Large</item>
+    </style>
+</resources>
