@@ -3,10 +3,13 @@ package com.walpolerobotics.scouting.scoutingserver.lib;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,12 +30,13 @@ public class ScoutClient {
     public static final int STATE_DISCONNECTED = 1;
     public static final int STATE_SEARCHING = 2;
 
-    private static final short MESSAGE_FILE_IN = 1;
-    private static final short MESSAGE_FILE_OUT = 2;
-    private static final short MESSAGE_SCOUT_IN = 3;
-    private static final short MESSAGE_SCOUT_OUT = 4;
-    private static final short MESSAGE_TEAM_IN = 5;
-    private static final short MESSAGE_TEAM_OUT = 5;
+    private static final String FILE_WRITE_LOCATION = "Scouting";
+
+    private static final short MESSAGE_FILE = 1;
+    private static final short MESSAGE_SCOUT_CHANGE = 2;
+    private static final short MESSAGE_SCOUT_SET = 3;
+    private static final short MESSAGE_TEAM_CHANGE = 4;
+    private static final short MESSAGE_TEAM_SET = 5;
 
     private BluetoothSocket mSocket;
     private BluetoothThread mThread;
@@ -45,6 +49,7 @@ public class ScoutClient {
     private ScoutNameChangeListener mScoutListener;
     private int mTeam;
     private TargetTeamChangeListener mTeamListener;
+    private FileTransferErrorListener mFileErrorListener;
     private int mAlliance;
     private int mPosition;
 
@@ -130,6 +135,10 @@ public class ScoutClient {
         mTeamListener = listener;
     }
 
+    public void setFileTransferErrorListener(FileTransferErrorListener listener) {
+        mFileErrorListener = listener;
+    }
+
     public void disconnect() {
         try {
             mSocket.close();
@@ -149,13 +158,13 @@ public class ScoutClient {
 
                     // Read following bytes based on message type
                     switch (msgType) {
-                        case MESSAGE_FILE_IN:
+                        case MESSAGE_FILE:
                             fileIn();
                             break;
-                        case MESSAGE_SCOUT_IN:
+                        case MESSAGE_SCOUT_CHANGE:
                             scoutIn();
                             break;
-                        case MESSAGE_TEAM_IN:
+                        case MESSAGE_TEAM_CHANGE:
                             teamIn();
                             break;
                     }
@@ -170,6 +179,12 @@ public class ScoutClient {
             // First 20 bytes are the SHA-1 checksum of the file
             byte[] preChecksum = new byte[20];
             mInputStream.read(preChecksum);
+
+            // Next 50 bytes are string of the filename
+            byte[] fileNameRaw = new byte[50];
+            mInputStream.read(fileNameRaw);
+            String fileName = new String(fileNameRaw);
+            fileName += ".csv";
 
             // Next 4 bytes are an int representing the amount of bytes of the file
             int fileSize = readInt();
@@ -190,8 +205,28 @@ public class ScoutClient {
             // Cross-check the checksum for transfer errors
             if (MessageDigest.isEqual(preChecksum, checksum)) {
                 // Save incoming file to the local filesystem
+                String state = Environment.getExternalStorageState();
+                if (Environment.MEDIA_MOUNTED.equals(state)) {
+                    // External media is writable, go ahead and save the file
+                    File pathFile = new File(Environment.getExternalStorageDirectory(),
+                            FILE_WRITE_LOCATION);
+                    File writeFile = new File(pathFile, fileName);
+
+                    FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
+                    fileOutputStream.write(file);
+                    fileOutputStream.close();
+                } else {
+                    if (mFileErrorListener != null) {
+                        mFileErrorListener.onFileTransferError(ScoutClient.this,
+                                FileTransferErrorListener.REASON_EXTERNAL_STORAGE_WRITE_ERROR);
+                    }
+                }
             } else {
                 // Display a message to a data analyst so the transfer error can be corrected
+                if (mFileErrorListener != null) {
+                    mFileErrorListener.onFileTransferError(ScoutClient.this,
+                            FileTransferErrorListener.REASON_CHECKSUM_NOT_EQUAL);
+                }
             }
         }
 
@@ -243,5 +278,11 @@ public class ScoutClient {
 
     public interface TargetTeamChangeListener {
         void onTeamChange(int newTeam);
+    }
+
+    public interface FileTransferErrorListener {
+        int REASON_CHECKSUM_NOT_EQUAL = 0;
+        int REASON_EXTERNAL_STORAGE_WRITE_ERROR = 1;
+        void onFileTransferError(ScoutClient client, int reason);
     }
 }
