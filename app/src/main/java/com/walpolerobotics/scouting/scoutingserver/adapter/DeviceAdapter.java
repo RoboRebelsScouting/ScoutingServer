@@ -20,14 +20,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     public DeviceAdapter(Context context) {
         mContext = context;
-
-        // Temporary code for demonstration
-        mDevices.add(new ScoutClient(ScoutClient.ALLIANCE_BLUE, ScoutClient.POSITION_1));
-        mDevices.add(new ScoutClient(ScoutClient.ALLIANCE_BLUE, ScoutClient.POSITION_2));
-        mDevices.add(new ScoutClient(ScoutClient.ALLIANCE_BLUE, ScoutClient.POSITION_3));
-        mDevices.add(new ScoutClient(ScoutClient.ALLIANCE_RED, ScoutClient.POSITION_1));
-        mDevices.add(new ScoutClient(ScoutClient.ALLIANCE_RED, ScoutClient.POSITION_2));
-        mDevices.add(new ScoutClient(ScoutClient.ALLIANCE_RED, ScoutClient.POSITION_3));
     }
 
     @Override
@@ -48,6 +40,20 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     @Override
     public int getItemCount() {
         return mDevices.size();
+    }
+
+    public void add(ScoutClient a) {
+        mDevices.add(a);
+        notifyItemInserted(mDevices.size());
+    }
+
+    public void remove(int pos) {
+        mDevices.remove(pos);
+        notifyItemRemoved(pos);
+    }
+
+    public void updateDeviceList(ArrayList<ScoutClient> list) {
+        mDevices = list;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

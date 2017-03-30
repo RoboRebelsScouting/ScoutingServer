@@ -4,4 +4,11 @@
     <string name="alliance_position">%1$s Driver Station %2$d</string>
     <string name="alliance_red">Red Alliance</string>
     <string name="alliance_blue">Blue Alliance</string>
+
+    <string name="dialog_no_bluetooth_title">No Bluetooth Support</string>
+    <string name="dialog_no_bluetooth_msg">This device has no Bluetooth support. Press OK to close
+    the app.</string>
+    <string name="dialog_bluetooth_disabled_title">Bluetooth Disabled</string>
+    <string name="dialog_bluetooth_disabled_msg">In order for this app to work properly, you must
+    turn Bluetooth on. Press OK to close the app.</string>
 </resources>
