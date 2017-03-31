@@ -10,10 +10,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
 import com.walpolerobotics.scouting.scoutingserver.dialog.BluetoothNotEnabledDialog;
 import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDialog;
+import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothManager;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.io.IOException;
@@ -21,9 +23,9 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_ENABLE_BT = 0;
+    private static final String TAG = "MainActivity";
 
-    private BluetoothAdapter mBluetoothAdapter;
+    private static final int REQUEST_ENABLE_BT = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +50,10 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_ENABLE_BT:
                 if (resultCode == Activity.RESULT_OK) {
-
+                    Log.i(TAG, "Bluetooth is enabled");
+                    BluetoothManager.getBluetoothManager().searchForDevices();
                 } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Log.e(TAG, "Bluetooth is disabled");
                     FragmentManager fm = getSupportFragmentManager();
                     new BluetoothNotEnabledDialog().show(fm, "bluetoothNotEnabled");
                 }
@@ -58,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preSetupBluetooth() {
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         // Check for Bluetooth support
-        if (mBluetoothAdapter == null) {
+        if (bluetoothAdapter == null) {
             // No Bluetooth support, display message
             FragmentManager fm = getSupportFragmentManager();
             new NoBluetoothSupportDialog().show(fm, "noBluetoothSupport");
@@ -68,29 +72,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Check if Bluetooth is enabled
-        if (!mBluetoothAdapter.isEnabled()) {
+        if (!bluetoothAdapter.isEnabled()) {
             // Bluetooth is not enabled, enable it
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            return;
         }
-    }
 
-    private class BluetoothInitThread extends Thread {
-
-        private final UUID id = UUID.fromString("35c2ad3a-14dc-11e7-93ae-92361f002671");
-
-        @Override
-        public void run() {
-            try {
-                BluetoothServerSocket serverSocket = mBluetoothAdapter
-                        .listenUsingRfcommWithServiceRecord("ScoutingServer", id);
-                ScoutClient client = new ScoutClient(ScoutClient.ALLIANCE_BLUE,
-                        ScoutClient.POSITION_1);
-                client.setBluetoothSocket(serverSocket.accept());
-                serverSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        BluetoothManager.getBluetoothManager().searchForDevices();
     }
 }

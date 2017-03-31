@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 
@@ -19,6 +20,8 @@ import java.security.NoSuchAlgorithmException;
 
 public class ScoutClient {
 
+    private static final String TAG = "ScoutClient";
+
     public static final int ALLIANCE_RED = 0;
     public static final int ALLIANCE_BLUE = 1;
 
@@ -31,6 +34,7 @@ public class ScoutClient {
     public static final int STATE_SEARCHING = 2;
 
     private static final String FILE_WRITE_LOCATION = "Scouting";
+    private static final int FILE_MAX_BYTE_SIZE = 16000;
 
     private static final short MESSAGE_FILE = 1;
     private static final short MESSAGE_SCOUT_CHANGE = 2;
@@ -155,16 +159,20 @@ public class ScoutClient {
                 try {
                     // Read first to bytes as message type header
                     short msgType = readShort();
+                    Log.v(TAG, "Read Header from incoming message: " + msgType);
 
                     // Read following bytes based on message type
                     switch (msgType) {
                         case MESSAGE_FILE:
+                            Log.v(TAG, "Processing File In");
                             fileIn();
                             break;
                         case MESSAGE_SCOUT_CHANGE:
+                            Log.v(TAG, "Processing Scout In");
                             scoutIn();
                             break;
                         case MESSAGE_TEAM_CHANGE:
+                            Log.v(TAG, "Processing Team In");
                             teamIn();
                             break;
                     }
@@ -179,19 +187,30 @@ public class ScoutClient {
             // First 20 bytes are the SHA-1 checksum of the file
             byte[] preChecksum = new byte[20];
             mInputStream.read(preChecksum);
+            Log.v(TAG, "Read pre-checksum: " + new String(preChecksum));
 
             // Next 50 bytes are string of the filename
             byte[] fileNameRaw = new byte[50];
             mInputStream.read(fileNameRaw);
             String fileName = new String(fileNameRaw);
             fileName += ".csv";
+            Log.v(TAG, "Read file name: " + fileName);
 
             // Next 4 bytes are an int representing the amount of bytes of the file
             int fileSize = readInt();
+            Log.v(TAG, "Read file size: " + fileSize);
 
             // Read the file
+            if (fileSize > FILE_MAX_BYTE_SIZE) {
+                interrupt();
+                mSocket.close();
+                mInputStream.close();
+                mOutputStream.close();
+                return;
+            }
             byte[] file = new byte[fileSize];
             mInputStream.read(file);
+            Log.v(TAG, "Read the file");
 
             // Calculate SHA-1 checksum of the incoming file
             byte[] checksum = null;
@@ -210,12 +229,14 @@ public class ScoutClient {
                     // External media is writable, go ahead and save the file
                     File pathFile = new File(Environment.getExternalStorageDirectory(),
                             FILE_WRITE_LOCATION);
+                    pathFile.mkdirs();
                     File writeFile = new File(pathFile, fileName);
 
                     FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
                     fileOutputStream.write(file);
                     fileOutputStream.close();
                 } else {
+                    Log.e(TAG, "Cannot write to external storage");
                     if (mFileErrorListener != null) {
                         mFileErrorListener.onFileTransferError(ScoutClient.this,
                                 FileTransferErrorListener.REASON_EXTERNAL_STORAGE_WRITE_ERROR);
@@ -223,6 +244,7 @@ public class ScoutClient {
                 }
             } else {
                 // Display a message to a data analyst so the transfer error can be corrected
+                Log.e(TAG, "Checksums did not equal");
                 if (mFileErrorListener != null) {
                     mFileErrorListener.onFileTransferError(ScoutClient.this,
                             FileTransferErrorListener.REASON_CHECKSUM_NOT_EQUAL);
