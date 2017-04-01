@@ -11,6 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
 import com.walpolerobotics.scouting.scoutingserver.dialog.BluetoothNotEnabledDialog;
@@ -26,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private static final int REQUEST_ENABLE_BT = 0;
+
+    private boolean bluetoothSetup = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +51,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.itemSearch:
+                if (bluetoothSetup) {
+                    BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
+                    if (bluetoothManager.isSearching()) {
+                        bluetoothManager.cancelSearch();
+                        item.setIcon(R.drawable.ic_find_replace_white_24px);
+                    } else {
+                        bluetoothManager.searchForDevices();
+                        item.setIcon(R.drawable.ic_stop_white_24px);
+                    }
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_ENABLE_BT:
                 if (resultCode == Activity.RESULT_OK) {
                     Log.i(TAG, "Bluetooth is enabled");
-                    BluetoothManager.getBluetoothManager().searchForDevices();
+                    bluetoothSetup = true;
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     Log.e(TAG, "Bluetooth is disabled");
                     FragmentManager fm = getSupportFragmentManager();
@@ -79,6 +111,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        BluetoothManager.getBluetoothManager().searchForDevices();
+        bluetoothSetup = true;
     }
 }

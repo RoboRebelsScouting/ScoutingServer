@@ -52,7 +52,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         notifyItemRemoved(pos);
     }
 
-    public void updateDeviceList(ArrayList<ScoutClient> list) {
+    public void setDevices(ArrayList<ScoutClient> list) {
         mDevices = list;
     }
 

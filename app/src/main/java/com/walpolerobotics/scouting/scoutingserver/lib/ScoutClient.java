@@ -1,5 +1,6 @@
 package com.walpolerobotics.scouting.scoutingserver.lib;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.res.Resources;
@@ -43,7 +44,6 @@ public class ScoutClient {
     private static final short MESSAGE_TEAM_SET = 5;
 
     private BluetoothSocket mSocket;
-    private BluetoothThread mThread;
     private InputStream mInputStream;
     private OutputStream mOutputStream;
 
@@ -57,7 +57,18 @@ public class ScoutClient {
     private int mAlliance;
     private int mPosition;
 
-    public ScoutClient(int alliance, int position) {
+    public ScoutClient(BluetoothSocket socket) {
+        mSocket = socket;
+        try {
+            mInputStream = socket.getInputStream();
+            mOutputStream = socket.getOutputStream();
+            mThread.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setAlliancePosition(int alliance, int position) {
         mAlliance = alliance;
         mPosition = position;
     }
@@ -106,27 +117,6 @@ public class ScoutClient {
         return mState;
     }
 
-    public void setBluetoothSocket(BluetoothSocket socket) {
-        mSocket = socket;
-
-        try {
-            mInputStream = mSocket.getInputStream();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
-        try {
-            mOutputStream = mSocket.getOutputStream();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
-        if (mThread == null) {
-            mThread = new BluetoothThread();
-            mThread.start();
-        }
-    }
-
     public void setClientStateChangeListener(ClientStateChangeListener listener) {
         mStateListener = listener;
     }
@@ -145,13 +135,16 @@ public class ScoutClient {
 
     public void disconnect() {
         try {
+            mThread.interrupt();
+            mOutputStream.close();
+            mInputStream.close();
             mSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private class BluetoothThread extends Thread {
+    private final Thread mThread = new Thread() {
 
         @Override
         public void run() {
@@ -181,7 +174,7 @@ public class ScoutClient {
                     break;
                 }
             }
-        }
+        };
 
         private void fileIn() throws IOException {
             // First 20 bytes are the SHA-1 checksum of the file
@@ -193,6 +186,7 @@ public class ScoutClient {
             byte[] fileNameRaw = new byte[50];
             mInputStream.read(fileNameRaw);
             String fileName = new String(fileNameRaw);
+            fileName = fileName.trim();
             fileName += ".csv";
             Log.v(TAG, "Read file name: " + fileName);
 
@@ -286,7 +280,7 @@ public class ScoutClient {
             ByteBuffer bb = ByteBuffer.wrap(intTmp);
             return bb.getInt();
         }
-    }
+    };
 
     public interface ClientStateChangeListener {
         void onConnected();

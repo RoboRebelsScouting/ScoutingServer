@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Scouting Server</string>
 
+    <string name="menu_search">Accept Connections</string>
+
     <string name="alliance_position">%1$s Driver Station %2$d</string>
     <string name="alliance_red">Red Alliance</string>
     <string name="alliance_blue">Blue Alliance</string>

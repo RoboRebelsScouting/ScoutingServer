@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 import com.walpolerobotics.scouting.scoutingserver.adapter.DeviceAdapter;
+import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothManager;
 
 public class DevicesFragment extends Fragment {
 
@@ -31,8 +32,8 @@ public class DevicesFragment extends Fragment {
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        DeviceAdapter adapter = new DeviceAdapter(getContext());
-        recyclerView.setAdapter(adapter);
+        BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
+        recyclerView.setAdapter(bluetoothManager.getListAdapter(getContext()));
 
         return view;
     }
