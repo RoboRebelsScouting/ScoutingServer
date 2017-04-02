@@ -1,5 +1,6 @@
 package com.walpolerobotics.scouting.scoutingserver.lib;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.res.Resources;
@@ -25,6 +26,7 @@ public class ScoutClient {
     public static final int STATE_DISCONNECTED = 1;
     public static final int STATE_SEARCHING = 2;
 
+    private final BluetoothDevice mDevice;
     private ClientHandlerThread mThread;
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -70,8 +72,13 @@ public class ScoutClient {
     private int mPosition;
 
     public ScoutClient(BluetoothSocket socket) {
+        mDevice = socket.getRemoteDevice();
         mThread = new ClientHandlerThread(this, socket);
         mThread.start();
+    }
+
+    public BluetoothDevice getBluetoothDevice() {
+        return mDevice;
     }
 
     public void setAlliancePosition(int alliance, int position) {
@@ -149,6 +156,12 @@ public class ScoutClient {
 
     public void disconnect() {
         mThread.disconnect();
+    }
+
+    public void setNewBluetoothSocket(BluetoothSocket socket) {
+        disconnect();
+        mThread = new ClientHandlerThread(this, socket);
+        mThread.start();
     }
 
     void handleEvent(ClientHandlerTask task, int state) {

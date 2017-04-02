@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.DeviceAdapter;
 
@@ -15,13 +16,14 @@ public class BluetoothManager {
 
     private static BluetoothManager mBluetoothManager;
 
-    private ArrayList<ScoutClient> mClients = new ArrayList<>();
+    private ArrayList<ScoutClient> mTempClients = new ArrayList<>();
     private DeviceAdapter mListAdapter;
 
     private ClientAcceptThread mAcceptThread;
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
+            Log.v(TAG, "Received Message, registering client");
             ScoutClient client = (ScoutClient) inputMessage.obj;
             registerClient(client);
         }
@@ -40,8 +42,8 @@ public class BluetoothManager {
 
     public DeviceAdapter getListAdapter(Context context) {
         if (mListAdapter == null) {
-            mListAdapter = new DeviceAdapter(context);
-            mListAdapter.setDevices(mClients);
+            mListAdapter = new DeviceAdapter(context, mTempClients);
+            mTempClients.clear();
         }
 
         return mListAdapter;
@@ -52,6 +54,10 @@ public class BluetoothManager {
             mAcceptThread = new ClientAcceptThread();
             mAcceptThread.start();
         }
+    }
+
+    public ArrayList<ScoutClient> getClientList() {
+        return mListAdapter.getDeviceList();
     }
 
     public void cancelSearch() {
@@ -65,21 +71,24 @@ public class BluetoothManager {
     }
 
     void handleAcceptedClient(ScoutClient client) {
+        Log.v(TAG, "Handling accepted client");
         Message acceptMessage = mHandler.obtainMessage(0, client);
         acceptMessage.sendToTarget();
     }
 
     private void registerClient(ScoutClient client) {
-        mClients.add(client);
         if (mListAdapter != null) {
             mListAdapter.add(client);
+        } else {
+            mTempClients.add(client);
         }
     }
 
     private void removeClient(int pos) {
-        mClients.remove(pos);
         if (mListAdapter != null) {
             mListAdapter.remove(pos);
+        } else {
+            mTempClients.remove(pos);
         }
     }
 }

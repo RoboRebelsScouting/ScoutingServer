@@ -33,6 +33,10 @@ class ClientHandlerThread extends Thread {
 
     ClientHandlerThread(ScoutClient client, BluetoothSocket socket) {
         mClient = client;
+        setSocket(socket);
+    }
+
+    private void setSocket(BluetoothSocket socket) {
         mSocket = socket;
 
         try {
@@ -78,6 +82,7 @@ class ClientHandlerThread extends Thread {
                 break;
             }
         }
+        Log.v(TAG, "Loop broken");
     }
 
     void disconnect() {
@@ -149,8 +154,13 @@ class ClientHandlerThread extends Thread {
                 // External media is writable, go ahead and save the file
                 File pathFile = new File(Environment.getExternalStorageDirectory(),
                         FILE_WRITE_LOCATION);
-                pathFile.mkdirs();
                 File writeFile = new File(pathFile, fileName);
+                if (!pathFile.exists() && !pathFile.mkdir()) {
+                    mClient.handleEvent(null, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
+                }
+                if (!writeFile.exists() && !writeFile.createNewFile()) {
+                    mClient.handleEvent(null, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
+                }
 
                 FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
                 fileOutputStream.write(file);

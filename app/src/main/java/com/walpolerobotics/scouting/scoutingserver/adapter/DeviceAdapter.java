@@ -2,6 +2,7 @@ package com.walpolerobotics.scouting.scoutingserver.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +17,11 @@ import java.util.ArrayList;
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
 
     private Context mContext;
-    private ArrayList<ScoutClient> mDevices = new ArrayList<>();
+    private ArrayList<ScoutClient> mDevices;
 
-    public DeviceAdapter(Context context) {
+    public DeviceAdapter(Context context, ArrayList<ScoutClient> devices) {
         mContext = context;
+        mDevices = devices;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     public void add(ScoutClient a) {
         mDevices.add(a);
-        notifyItemInserted(mDevices.size());
+        notifyItemInserted(mDevices.size() - 1);
     }
 
     public void remove(int pos) {
@@ -52,8 +54,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         notifyItemRemoved(pos);
     }
 
-    public void setDevices(ArrayList<ScoutClient> list) {
-        mDevices = list;
+    public ArrayList<ScoutClient> getDeviceList() {
+        return mDevices;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

@@ -1,7 +1,9 @@
 package com.walpolerobotics.scouting.scoutingserver.lib;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.IOException;
@@ -25,12 +27,23 @@ class ClientAcceptThread extends Thread {
             Log.v(TAG, "Beginning search for tablet");
             mServerSocket = mBluetoothAdapter
                     .listenUsingRfcommWithServiceRecord("ScoutingServer", ID);
-            while (!interrupted()) {
+            iteration: while (!interrupted()) {
                 Log.v(TAG, "Now accepting connections");
                 try {
-                    ScoutClient client = new ScoutClient(mServerSocket.accept());
-                    Log.v(TAG, "Connection accepted");
+                    BluetoothSocket socket = mServerSocket.accept();
+                    BluetoothDevice device = socket.getRemoteDevice();
                     BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
+                    for (ScoutClient client : bluetoothManager.getClientList()) {
+                        BluetoothDevice clientDevice = client.getBluetoothDevice();
+                        String clientAddress = clientDevice.getAddress();
+                        if (clientAddress.equals(device.getAddress())) {
+                            Log.v(TAG, "Accepted already connected client");
+                            client.setNewBluetoothSocket(socket);
+                            continue iteration;
+                        }
+                    }
+                    Log.v(TAG, "Accepted new client");
+                    ScoutClient client = new ScoutClient(socket);
                     bluetoothManager.handleAcceptedClient(client);
                 } catch (IOException e) {
                     e.printStackTrace();
