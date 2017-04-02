@@ -17,7 +17,6 @@ public class NoBluetoothSupportDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(R.string.dialog_no_bluetooth_title)
                 .setMessage(R.string.dialog_no_bluetooth_msg)
-                .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -26,5 +25,11 @@ public class NoBluetoothSupportDialog extends DialogFragment {
                     }
                 });
         return builder.create();
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        // Close the app, it can do nothing without Bluetooth
+        getActivity().finish();
     }
 }
