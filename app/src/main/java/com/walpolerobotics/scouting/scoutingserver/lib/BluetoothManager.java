@@ -23,9 +23,16 @@ public class BluetoothManager {
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
-            Log.v(TAG, "Received Message, registering client");
-            ScoutClient client = (ScoutClient) inputMessage.obj;
-            registerClient(client);
+            ClientAcceptTask task = (ClientAcceptTask) inputMessage.obj;
+            ScoutClient client = task.client;
+            switch (inputMessage.what) {
+                case ClientAcceptTask.EVENT_ACCEPT_NEW:
+                    registerClient(client);
+                    break;
+                case ClientAcceptTask.EVENT_RECONNECT:
+                    client.setNewBluetoothSocket(task.socket);
+                    break;
+            }
         }
     };
 
@@ -70,9 +77,9 @@ public class BluetoothManager {
         return mAcceptThread != null && mAcceptThread.isAlive();
     }
 
-    void handleAcceptedClient(ScoutClient client) {
+    void handleAcceptedClient(ClientAcceptTask task, int event) {
         Log.v(TAG, "Handling accepted client");
-        Message acceptMessage = mHandler.obtainMessage(0, client);
+        Message acceptMessage = mHandler.obtainMessage(event, task);
         acceptMessage.sendToTarget();
     }
 

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 
@@ -21,10 +22,6 @@ public class ScoutClient {
     public static final int POSITION_1 = 0;
     public static final int POSITION_2 = 1;
     public static final int POSITION_3 = 2;
-
-    public static final int STATE_CONNECTED = 0;
-    public static final int STATE_DISCONNECTED = 1;
-    public static final int STATE_SEARCHING = 2;
 
     private final BluetoothDevice mDevice;
     private ClientHandlerThread mThread;
@@ -73,8 +70,7 @@ public class ScoutClient {
 
     public ScoutClient(BluetoothSocket socket) {
         mDevice = socket.getRemoteDevice();
-        mThread = new ClientHandlerThread(this, socket);
-        mThread.start();
+        initHandlerThread(socket);
     }
 
     public BluetoothDevice getBluetoothDevice() {
@@ -158,10 +154,23 @@ public class ScoutClient {
         mThread.disconnect();
     }
 
+    public void notifyDisconnect() {
+        if (mStateListener != null) {
+            mStateListener.onDisconnected();
+        }
+    }
+
     public void setNewBluetoothSocket(BluetoothSocket socket) {
         disconnect();
+        initHandlerThread(socket);
+    }
+
+    private void initHandlerThread(BluetoothSocket socket) {
         mThread = new ClientHandlerThread(this, socket);
         mThread.start();
+        if (mStateListener != null) {
+            mStateListener.onConnected();
+        }
     }
 
     void handleEvent(ClientHandlerTask task, int state) {
@@ -172,7 +181,6 @@ public class ScoutClient {
     public interface ClientStateChangeListener {
         void onConnected();
         void onDisconnected();
-        void onSearching();
     }
 
     public interface ScoutNameChangeListener {

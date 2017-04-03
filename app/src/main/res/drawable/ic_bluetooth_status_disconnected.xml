@@ -4,14 +4,14 @@
         android:width="52dp"
         android:height="52dp">
         <shape android:shape="oval">
-            <solid android:color="#E0E0E0" />
+            <solid android:color="#B71C1C" />
         </shape>
     </item>
     <item
         android:width="36dp"
         android:height="36dp"
         android:bottom="8dp"
-        android:drawable="@drawable/ic_bluetooth_connected_black_24dp"
+        android:drawable="@drawable/ic_error_outline_white_24px"
         android:left="8dp"
         android:right="8dp"
         android:top="8dp" />

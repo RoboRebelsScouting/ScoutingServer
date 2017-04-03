@@ -1,12 +1,17 @@
 package com.walpolerobotics.scouting.scoutingserver.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
@@ -33,10 +38,21 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         ScoutClient client = mDevices.get(position);
         holder.titleStrip.setBackgroundColor(client.getAllianceColor(mContext));
         holder.deviceRole.setText(client.getAllianceString(mContext));
+        client.setClientStateChangeListener(new ScoutClient.ClientStateChangeListener() {
+            @Override
+            public void onConnected() {
+                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
+            }
+
+            @Override
+            public void onDisconnected() {
+                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
+            }
+        });
     }
 
     @Override
@@ -61,13 +77,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private FrameLayout titleStrip;
-        TextView deviceRole;
+        private TextView deviceRole;
+        private ImageView stateIcon;
 
         private ViewHolder(View itemView) {
             super(itemView);
 
             titleStrip = (FrameLayout) itemView.findViewById(R.id.titleStrip);
             deviceRole = (TextView) itemView.findViewById(R.id.deviceRole);
+            stateIcon = (ImageView) itemView.findViewById(R.id.statusIcon);
         }
     }
 }

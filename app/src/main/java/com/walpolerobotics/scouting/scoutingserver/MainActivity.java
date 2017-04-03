@@ -2,8 +2,12 @@ package com.walpolerobotics.scouting.scoutingserver;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -32,6 +36,27 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean bluetoothSetup = false;
 
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                // Device has disconnected
+                BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
+                for (ScoutClient client : bluetoothManager.getClientList()) {
+                    BluetoothDevice clientDevice = client.getBluetoothDevice();
+                    String clientAddress = clientDevice.getAddress();
+                    if (clientAddress.equals(device.getAddress())) {
+                        client.notifyDisconnect();
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +73,22 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
 
         preSetupBluetooth();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        unregisterReceiver(mReceiver);
     }
 
     @Override

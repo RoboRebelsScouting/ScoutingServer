@@ -38,13 +38,18 @@ class ClientAcceptThread extends Thread {
                         String clientAddress = clientDevice.getAddress();
                         if (clientAddress.equals(device.getAddress())) {
                             Log.v(TAG, "Accepted already connected client");
-                            client.setNewBluetoothSocket(socket);
+                            ClientAcceptTask task = new ClientAcceptTask();
+                            task.client = client;
+                            task.socket = socket;
+                            bluetoothManager.handleAcceptedClient(task,
+                                    ClientAcceptTask.EVENT_RECONNECT);
                             continue iteration;
                         }
                     }
                     Log.v(TAG, "Accepted new client");
-                    ScoutClient client = new ScoutClient(socket);
-                    bluetoothManager.handleAcceptedClient(client);
+                    ClientAcceptTask task = new ClientAcceptTask();
+                    task.client = new ScoutClient(socket);
+                    bluetoothManager.handleAcceptedClient(task, ClientAcceptTask.EVENT_ACCEPT_NEW);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
