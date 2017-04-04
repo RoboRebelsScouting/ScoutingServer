@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        mReceiver = new BluetoothBroadcastReceiver(this);
+        mReceiver = new BluetoothBroadcastReceiver();
         registerReceiver(mReceiver, filter);
     }
 

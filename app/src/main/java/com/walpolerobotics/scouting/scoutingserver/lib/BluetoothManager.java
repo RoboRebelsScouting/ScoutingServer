@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.DeviceAdapter;
@@ -47,7 +48,7 @@ public class BluetoothManager {
         return mBluetoothManager;
     }
 
-    public DeviceAdapter getListAdapter(Context context) {
+    public DeviceAdapter getListAdapter(AppCompatActivity context) {
         if (mListAdapter == null) {
             mListAdapter = new DeviceAdapter(context, mTempClients);
             mTempClients.clear();

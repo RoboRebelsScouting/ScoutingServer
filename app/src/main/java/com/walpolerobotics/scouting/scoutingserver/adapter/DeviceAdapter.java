@@ -6,6 +6,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,16 +20,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
+import com.walpolerobotics.scouting.scoutingserver.dialog.DeviceDisconnectedDialog;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
 
-    private Context mContext;
+    private AppCompatActivity mContext;
     private ArrayList<ScoutClient> mDevices;
 
-    public DeviceAdapter(Context context, ArrayList<ScoutClient> devices) {
+    public DeviceAdapter(AppCompatActivity context, ArrayList<ScoutClient> devices) {
         mContext = context;
         mDevices = devices;
     }
@@ -40,8 +45,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        ScoutClient client = mDevices.get(position);
-        BluetoothDevice device = client.getBluetoothDevice();
+        final ScoutClient client = mDevices.get(position);
+        final BluetoothDevice device = client.getBluetoothDevice();
         holder.primary.setText(device.getName());
         holder.secondary.setText(device.getAddress());
         switch (client.getState()) {
@@ -54,14 +59,23 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
         }
         client.setClientStateChangeListener(new ScoutClient.ClientStateChangeListener() {
+
+            private DialogFragment mDialog;
+
             @Override
             public void onConnected() {
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
+                if (mDialog != null) {
+                    mDialog.dismiss();
+                }
             }
 
             @Override
             public void onDisconnected() {
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
+                mDialog = DeviceDisconnectedDialog.createDialog(device.getName());
+                FragmentManager fm = mContext.getSupportFragmentManager();
+                mDialog.show(fm, "deviceDisconnectedDialog");
             }
         });
     }

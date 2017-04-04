@@ -11,12 +11,6 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "BluetoothBroadcastRe...";
 
-    private AppCompatActivity mActivity;
-
-    public BluetoothBroadcastReceiver(AppCompatActivity activity) {
-        mActivity = activity;
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -32,7 +26,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 BluetoothDevice clientDevice = client.getBluetoothDevice();
                 String clientAddress = clientDevice.getAddress();
                 if (clientAddress.equals(device.getAddress())) {
-                    client.notifyDisconnect(mActivity);
+                    client.notifyDisconnect();
                     break;
                 }
             }

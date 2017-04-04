@@ -160,14 +160,11 @@ public class ScoutClient {
         mThread.disconnect();
     }
 
-    public void notifyDisconnect(AppCompatActivity activity) {
+    public void notifyDisconnect() {
         if (mStateListener != null) {
             mStateListener.onDisconnected();
         }
         mState = STATE_DISCONNECTED;
-        DeviceDisconnectedDialog dialog = DeviceDisconnectedDialog.createDialog(mDevice.getName());
-        FragmentManager fm = activity.getSupportFragmentManager();
-        dialog.show(fm, "deviceDisconnectedDialog");
     }
 
     public void setNewBluetoothSocket(BluetoothSocket socket) {
