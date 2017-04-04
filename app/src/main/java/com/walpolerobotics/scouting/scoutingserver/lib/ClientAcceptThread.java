@@ -37,7 +37,7 @@ class ClientAcceptThread extends Thread {
                         BluetoothDevice clientDevice = client.getBluetoothDevice();
                         String clientAddress = clientDevice.getAddress();
                         if (clientAddress.equals(device.getAddress())) {
-                            Log.v(TAG, "Accepted already connected client");
+                            Log.v(TAG, "Accepted already connected client: " + device.getName());
                             ClientAcceptTask task = new ClientAcceptTask();
                             task.client = client;
                             task.socket = socket;
@@ -46,7 +46,7 @@ class ClientAcceptThread extends Thread {
                             continue iteration;
                         }
                     }
-                    Log.v(TAG, "Accepted new client");
+                    Log.v(TAG, "Accepted new client: " + device.getName());
                     ClientAcceptTask task = new ClientAcceptTask();
                     task.client = new ScoutClient(socket);
                     bluetoothManager.handleAcceptedClient(task, ClientAcceptTask.EVENT_ACCEPT_NEW);

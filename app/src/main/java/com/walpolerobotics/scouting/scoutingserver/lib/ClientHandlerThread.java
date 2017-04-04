@@ -134,7 +134,12 @@ class ClientHandlerThread extends Thread {
             return;
         }
         byte[] file = new byte[fileSize];
-        mInputStream.read(file);
+        //Log.v(TAG, "Read bytes: " + mInputStream.read(file));
+        byte[] fileByte = new byte[1];
+        for (int c = 0; c < fileSize; c++) {
+            mInputStream.read(fileByte);
+            file[c] = fileByte[0];
+        }
         Log.v(TAG, "Read the file");
 
         // Calculate SHA-1 checksum of the incoming file

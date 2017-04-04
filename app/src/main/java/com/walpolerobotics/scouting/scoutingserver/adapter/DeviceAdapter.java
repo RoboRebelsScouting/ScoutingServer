@@ -41,7 +41,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     public void onBindViewHolder(final ViewHolder holder, int position) {
         ScoutClient client = mDevices.get(position);
         holder.titleStrip.setBackgroundColor(client.getAllianceColor(mContext));
-        holder.deviceRole.setText(client.getAllianceString(mContext));
+        holder.deviceRole.setText(client.getBluetoothDevice().getName());
         client.setClientStateChangeListener(new ScoutClient.ClientStateChangeListener() {
             @Override
             public void onConnected() {
