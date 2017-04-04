@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean bluetoothSetup = false;
 
-    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver();
+    private BroadcastReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        mReceiver = new BluetoothBroadcastReceiver(this);
         registerReceiver(mReceiver, filter);
     }
 

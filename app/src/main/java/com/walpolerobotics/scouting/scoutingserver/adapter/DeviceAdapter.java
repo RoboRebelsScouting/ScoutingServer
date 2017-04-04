@@ -44,6 +44,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         BluetoothDevice device = client.getBluetoothDevice();
         holder.primary.setText(device.getName());
         holder.secondary.setText(device.getAddress());
+        switch (client.getState()) {
+            case ScoutClient.STATE_CONNECTED:
+                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
+                break;
+            case ScoutClient.STATE_DISCONNECTED:
+                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
+                break;
+
+        }
         client.setClientStateChangeListener(new ScoutClient.ClientStateChangeListener() {
             @Override
             public void onConnected() {

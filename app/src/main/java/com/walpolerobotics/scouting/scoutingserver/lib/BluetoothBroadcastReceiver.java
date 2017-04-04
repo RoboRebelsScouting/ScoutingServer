@@ -4,11 +4,18 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 public class BluetoothBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = "BluetoothBroadcastRe...";
+
+    private AppCompatActivity mActivity;
+
+    public BluetoothBroadcastReceiver(AppCompatActivity activity) {
+        mActivity = activity;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -25,7 +32,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 BluetoothDevice clientDevice = client.getBluetoothDevice();
                 String clientAddress = clientDevice.getAddress();
                 if (clientAddress.equals(device.getAddress())) {
-                    client.notifyDisconnect();
+                    client.notifyDisconnect(mActivity);
                     break;
                 }
             }

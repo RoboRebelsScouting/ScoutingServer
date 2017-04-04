@@ -1,5 +1,6 @@
 package com.walpolerobotics.scouting.scoutingserver.lib;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -7,10 +8,12 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
+import com.walpolerobotics.scouting.scoutingserver.dialog.DeviceDisconnectedDialog;
 
 public class ScoutClient {
 
@@ -22,6 +25,9 @@ public class ScoutClient {
     public static final int POSITION_1 = 0;
     public static final int POSITION_2 = 1;
     public static final int POSITION_3 = 2;
+
+    public static final int STATE_CONNECTED = 0;
+    public static final int STATE_DISCONNECTED = 1;
 
     private final BluetoothDevice mDevice;
     private ClientHandlerThread mThread;
@@ -154,10 +160,14 @@ public class ScoutClient {
         mThread.disconnect();
     }
 
-    public void notifyDisconnect() {
+    public void notifyDisconnect(AppCompatActivity activity) {
         if (mStateListener != null) {
             mStateListener.onDisconnected();
         }
+        mState = STATE_DISCONNECTED;
+        DeviceDisconnectedDialog dialog = DeviceDisconnectedDialog.createDialog(mDevice.getName());
+        FragmentManager fm = activity.getSupportFragmentManager();
+        dialog.show(fm, "deviceDisconnectedDialog");
     }
 
     public void setNewBluetoothSocket(BluetoothSocket socket) {
@@ -171,6 +181,7 @@ public class ScoutClient {
         if (mStateListener != null) {
             mStateListener.onConnected();
         }
+        mState = STATE_CONNECTED;
     }
 
     void handleEvent(ClientHandlerTask task, int state) {
