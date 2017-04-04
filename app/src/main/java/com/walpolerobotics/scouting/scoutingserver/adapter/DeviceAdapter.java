@@ -1,5 +1,6 @@
 package com.walpolerobotics.scouting.scoutingserver.adapter;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -40,8 +41,9 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         ScoutClient client = mDevices.get(position);
-        holder.titleStrip.setBackgroundColor(client.getAllianceColor(mContext));
-        holder.deviceRole.setText(client.getBluetoothDevice().getName());
+        BluetoothDevice device = client.getBluetoothDevice();
+        holder.primary.setText(device.getName());
+        holder.secondary.setText(device.getAddress());
         client.setClientStateChangeListener(new ScoutClient.ClientStateChangeListener() {
             @Override
             public void onConnected() {
@@ -76,16 +78,16 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private FrameLayout titleStrip;
-        private TextView deviceRole;
+        private TextView primary;
+        private TextView secondary;
         private ImageView stateIcon;
 
         private ViewHolder(View itemView) {
             super(itemView);
 
-            titleStrip = (FrameLayout) itemView.findViewById(R.id.titleStrip);
-            deviceRole = (TextView) itemView.findViewById(R.id.deviceRole);
-            stateIcon = (ImageView) itemView.findViewById(R.id.statusIcon);
+            primary = (TextView) itemView.findViewById(R.id.firstLine);
+            secondary = (TextView) itemView.findViewById(R.id.secondLine);
+            stateIcon = (ImageView) itemView.findViewById(R.id.stateIcon);
         }
     }
 }

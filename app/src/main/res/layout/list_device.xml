@@ -1,39 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/list_card_height"
-    android:layout_margin="@dimen/list_card_margin"
-    android:padding="@dimen/list_card_padding">
+    style="@style/List.Item"
+    android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/stateIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="16dp"
+        tools:ignore="ContentDescription" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        style="@style/List.Content"
         android:orientation="vertical">
-        <FrameLayout
-            android:id="@+id/titleStrip"
-            style="@style/List.Item.Dense">
-            <ImageView
-                style="@style/List.Icon"
-                android:src="@drawable/ic_tablet_android_white_24px"
-                tools:ignore="ContentDescription" />
-            <TextView
-                style="@style/List.Content"
-                android:id="@+id/deviceRole"
-                android:textAppearance="@style/TextAppearance.Primary.Inverse"/>
-        </FrameLayout>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="@dimen/list_card_padding">
-            <ImageView
-                android:id="@+id/statusIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_bluetooth_status_connected"
-                tools:ignore="ContentDescription" />
-        </RelativeLayout>
-    </LinearLayout>
 
-</android.support.v7.widget.CardView>
+        <TextView
+            android:id="@+id/firstLine"
+            style="@style/List.Text.Primary" />
+
+        <TextView
+            android:id="@+id/secondLine"
+            style="@style/List.Text.Secondary" />
+    </LinearLayout>
+</FrameLayout>
