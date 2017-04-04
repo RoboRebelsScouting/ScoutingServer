@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
 import com.walpolerobotics.scouting.scoutingserver.dialog.BluetoothNotEnabledDialog;
 import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDialog;
+import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothBroadcastReceiver;
 import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothManager;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
@@ -36,26 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean bluetoothSetup = false;
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
-                // Device has disconnected
-                BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
-                for (ScoutClient client : bluetoothManager.getClientList()) {
-                    BluetoothDevice clientDevice = client.getBluetoothDevice();
-                    String clientAddress = clientDevice.getAddress();
-                    if (clientAddress.equals(device.getAddress())) {
-                        client.notifyDisconnect();
-                        break;
-                    }
-                }
-            }
-        }
-    };
+    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         registerReceiver(mReceiver, filter);
     }
