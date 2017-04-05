@@ -9,4 +9,5 @@ class ClientHandlerTask {
 
     String scout;
     int team;
+    String fileName;
 }

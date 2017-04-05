@@ -50,13 +50,13 @@ public class ScoutClient {
                     break;
                 case ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL:
                     if (mFileErrorListener != null) {
-                        mFileErrorListener.onFileTransferError(ScoutClient.this,
+                        mFileErrorListener.onFileTransferError(task.fileName,
                                 FileTransferErrorListener.REASON_EXTERNAL_STORAGE_WRITE_ERROR);
                     }
                     break;
                 case ClientHandlerTask.EVENT_FILE_ERROR_CHECKSUM:
                     if (mFileErrorListener != null) {
-                        mFileErrorListener.onFileTransferError(ScoutClient.this,
+                        mFileErrorListener.onFileTransferError(task.fileName,
                                 FileTransferErrorListener.REASON_CHECKSUM_NOT_EQUAL);
                     }
                     break;
@@ -202,6 +202,6 @@ public class ScoutClient {
     public interface FileTransferErrorListener {
         int REASON_CHECKSUM_NOT_EQUAL = 0;
         int REASON_EXTERNAL_STORAGE_WRITE_ERROR = 1;
-        void onFileTransferError(ScoutClient client, int reason);
+        void onFileTransferError(String fileName, int reason);
     }
 }

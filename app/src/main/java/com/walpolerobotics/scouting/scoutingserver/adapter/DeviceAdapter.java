@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 import com.walpolerobotics.scouting.scoutingserver.dialog.DeviceDisconnectedDialog;
+import com.walpolerobotics.scouting.scoutingserver.dialog.FileTransferErrorDialog;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
@@ -76,6 +77,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
                 mDialog = DeviceDisconnectedDialog.createDialog(device.getName());
                 FragmentManager fm = mContext.getSupportFragmentManager();
                 mDialog.show(fm, "deviceDisconnectedDialog");
+            }
+        });
+        client.setFileTransferErrorListener(new ScoutClient.FileTransferErrorListener() {
+            @Override
+            public void onFileTransferError(String fileName, int reason) {
+                FileTransferErrorDialog dialog = FileTransferErrorDialog.createDialog(reason,
+                        fileName);
+                FragmentManager fm = mContext.getSupportFragmentManager();
+                dialog.show(fm, "fileTransferErrorDialog");
             }
         });
     }

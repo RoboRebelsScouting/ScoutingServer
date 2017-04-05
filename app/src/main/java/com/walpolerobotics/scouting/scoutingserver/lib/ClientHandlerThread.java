@@ -160,11 +160,11 @@ class ClientHandlerThread extends Thread {
                 File pathFile = new File(Environment.getExternalStorageDirectory(),
                         FILE_WRITE_LOCATION);
                 File writeFile = new File(pathFile, fileName);
-                if (!pathFile.exists() && !pathFile.mkdir()) {
-                    mClient.handleEvent(null, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
-                }
-                if (!writeFile.exists() && !writeFile.createNewFile()) {
-                    mClient.handleEvent(null, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
+                if ((!pathFile.exists() && !pathFile.mkdir()) || (!writeFile.exists() &&
+                        !writeFile.createNewFile())) {
+                    ClientHandlerTask task = new ClientHandlerTask();
+                    task.fileName = fileName;
+                    mClient.handleEvent(task, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
                 }
 
                 FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
