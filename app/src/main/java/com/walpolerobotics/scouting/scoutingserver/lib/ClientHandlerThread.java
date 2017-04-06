@@ -17,7 +17,8 @@ class ClientHandlerThread extends Thread {
 
     private static final String TAG = "ClientHandlerThread";
 
-    private static final String FILE_WRITE_LOCATION = "Scouting";
+    // TODO: Workout file writing problem
+    private static final String FILE_WRITE_LOCATION = "DCIM";
     private static final int FILE_MAX_BYTE_SIZE = 16000;
 
     private static final short MESSAGE_FILE = 1;
