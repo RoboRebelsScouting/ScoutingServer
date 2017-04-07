@@ -26,7 +26,6 @@ public class DevicesFragment extends Fragment {
     public static final int POSITION = 0;
     public static final String FRAGMENT_TITLE = "Devices";
 
-    private BroadcastReceiver mReceiver;
     private ServerService mService;
 
     private RecyclerView mList;
@@ -44,7 +43,6 @@ public class DevicesFragment extends Fragment {
         super.onStart();
 
         Intent intent = new Intent(getActivity(), ServerService.class);
-        getActivity().startService(intent);
         getActivity().bindService(intent, mConnection, Activity.BIND_AUTO_CREATE);
     }
 

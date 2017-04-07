@@ -1,9 +1,12 @@
 package com.walpolerobotics.scouting.scoutingserver;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -19,8 +22,9 @@ import java.util.ArrayList;
 public class ServerService extends Service {
 
     private static final String TAG = "ServerService";
+    private static final int ONGOING_NOTIFICATION_ID = 1;
 
-    private ServerBinder mBinder = new ServerBinder();
+    private IBinder mBinder = new ServerBinder();
 
     private ArrayList<ScoutClient> mClients = new ArrayList<>();
     private DeviceAdapter mListAdapter;
@@ -47,11 +51,29 @@ public class ServerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v(TAG, "Service Intent received");
+        Log.v(TAG, "onStartCommand - Accept Thread: " + mAcceptThread);
+        Log.v(TAG, "this: " + this.hashCode());
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle(getText(R.string.notification_title))
+                .setContentText(getText(R.string.notification_msg))
+                .setSmallIcon(R.drawable.ic_find_replace_white_24px)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        startForeground(ONGOING_NOTIFICATION_ID, notification);
+
         return START_STICKY;
     }
 
     @Override
-    public ServerBinder onBind(Intent intent) {
+    public IBinder onBind(Intent intent) {
+        Log.v(TAG, "Binding to service");
+        Log.v(TAG, "onBind - Accept Thread: " + mAcceptThread);
         return mBinder;
     }
 
