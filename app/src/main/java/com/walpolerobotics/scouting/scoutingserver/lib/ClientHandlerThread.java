@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-class ClientHandlerThread extends Thread {
+public class ClientHandlerThread extends Thread {
 
     private static final String TAG = "ClientHandlerThread";
 
@@ -31,7 +31,7 @@ class ClientHandlerThread extends Thread {
     private InputStream mInputStream;
     private OutputStream mOutputStream;
 
-    ClientHandlerThread(ScoutClient client, BluetoothSocket socket) {
+    public ClientHandlerThread(ScoutClient client, BluetoothSocket socket) {
         mClient = client;
         setSocket(socket);
     }

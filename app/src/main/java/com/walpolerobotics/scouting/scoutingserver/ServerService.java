@@ -1,6 +1,8 @@
-package com.walpolerobotics.scouting.scoutingserver.lib;
+package com.walpolerobotics.scouting.scoutingserver;
 
-import android.content.Context;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -8,16 +10,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.DeviceAdapter;
+import com.walpolerobotics.scouting.scoutingserver.lib.ClientAcceptTask;
+import com.walpolerobotics.scouting.scoutingserver.lib.ClientAcceptThread;
+import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
 
-public class BluetoothManager {
+public class ServerService extends Service {
 
-    private static final String TAG = "BluetoothManager";
+    private static final String TAG = "ServerService";
 
-    private static BluetoothManager mBluetoothManager;
+    private ServerBinder mBinder = new ServerBinder();
 
-    private ArrayList<ScoutClient> mTempClients = new ArrayList<>();
+    private ArrayList<ScoutClient> mClients = new ArrayList<>();
     private DeviceAdapter mListAdapter;
 
     private ClientAcceptThread mAcceptThread;
@@ -37,21 +42,27 @@ public class BluetoothManager {
         }
     };
 
-    private BluetoothManager() {
+    public ServerService() {
     }
 
-    public static BluetoothManager getBluetoothManager() {
-        if (mBluetoothManager == null) {
-            mBluetoothManager = new BluetoothManager();
-        }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
 
-        return mBluetoothManager;
+    @Override
+    public ServerBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    @Override
+    public void onDestroy() {
+
     }
 
     public DeviceAdapter getListAdapter(AppCompatActivity context) {
         if (mListAdapter == null) {
-            mListAdapter = new DeviceAdapter(context, mTempClients);
-            mTempClients.clear();
+            mListAdapter = new DeviceAdapter(context, mClients);
         }
 
         return mListAdapter;
@@ -59,7 +70,7 @@ public class BluetoothManager {
 
     public void searchForDevices() {
         if (mAcceptThread == null || !mAcceptThread.isAlive()) {
-            mAcceptThread = new ClientAcceptThread();
+            mAcceptThread = new ClientAcceptThread(this);
             mAcceptThread.start();
         }
     }
@@ -78,25 +89,23 @@ public class BluetoothManager {
         return mAcceptThread != null && mAcceptThread.isAlive();
     }
 
-    void handleAcceptedClient(ClientAcceptTask task, int event) {
+    public void handleAcceptedClient(ClientAcceptTask task, int event) {
         Log.v(TAG, "Handling accepted client");
         Message acceptMessage = mHandler.obtainMessage(event, task);
         acceptMessage.sendToTarget();
     }
 
     private void registerClient(ScoutClient client) {
-        if (mListAdapter != null) {
-            mListAdapter.add(client);
-        } else {
-            mTempClients.add(client);
-        }
+        mClients.add(client);
     }
 
     private void removeClient(int pos) {
-        if (mListAdapter != null) {
-            mListAdapter.remove(pos);
-        } else {
-            mTempClients.remove(pos);
+        mClients.remove(pos);
+    }
+
+    public class ServerBinder extends Binder {
+        public ServerService getInstance() {
+            return ServerService.this;
         }
     }
 }
