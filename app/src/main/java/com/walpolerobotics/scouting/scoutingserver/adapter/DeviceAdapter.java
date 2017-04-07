@@ -85,16 +85,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         return mDevices.size();
     }
 
-    public void add(ScoutClient a) {
-        mDevices.add(a);
-        notifyItemInserted(mDevices.size() - 1);
-    }
-
-    public void remove(int pos) {
-        mDevices.remove(pos);
-        notifyItemRemoved(pos);
-    }
-
     public ArrayList<ScoutClient> getDeviceList() {
         return mDevices;
     }

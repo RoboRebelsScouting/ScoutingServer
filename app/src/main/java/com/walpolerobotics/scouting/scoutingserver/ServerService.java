@@ -121,10 +121,16 @@ public class ServerService extends Service {
 
     private void registerClient(ScoutClient client) {
         mClients.add(client);
+        if (mListAdapter != null) {
+            mListAdapter.notifyItemInserted(mClients.size() - 1);
+        }
     }
 
     private void removeClient(int pos) {
         mClients.remove(pos);
+        if (mListAdapter != null) {
+            mListAdapter.notifyItemRemoved(pos);
+        }
     }
 
     public class ServerBinder extends Binder {
