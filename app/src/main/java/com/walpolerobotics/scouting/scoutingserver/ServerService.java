@@ -57,7 +57,7 @@ public class ServerService extends Service {
 
     @Override
     public void onDestroy() {
-
+        Log.v(TAG, "Service destroyed");
     }
 
     public DeviceAdapter getListAdapter(AppCompatActivity context) {
@@ -83,9 +83,11 @@ public class ServerService extends Service {
         if (mAcceptThread != null) {
             mAcceptThread.cancelClientAccept();
         }
+        Log.v(TAG, "Cancelled searching");
     }
 
     public boolean isSearching() {
+        Log.v(TAG, "Accept Thread: " + mAcceptThread);
         return mAcceptThread != null && mAcceptThread.isAlive();
     }
 

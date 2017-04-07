@@ -84,6 +84,19 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
+        if (mService != null) {
+            Log.v(TAG, "Changing action button icon");
+            MenuItem item = menu.findItem(R.id.itemSearch);
+            if (mService.isSearching()) {
+                Log.v(TAG, "We are already searching");
+                item.setIcon(R.drawable.ic_stop_white_24px);
+            } else {
+                Log.v(TAG, "We are not yet searching");
+                item.setIcon(R.drawable.ic_find_replace_white_24px);
+            }
+        }
+
         return true;
     }
 
