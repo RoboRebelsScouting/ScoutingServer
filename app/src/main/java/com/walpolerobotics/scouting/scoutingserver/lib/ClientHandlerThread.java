@@ -2,6 +2,7 @@ package com.walpolerobotics.scouting.scoutingserver.lib;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -10,6 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -25,6 +32,7 @@ class ClientHandlerThread extends Thread {
     private static final short MESSAGE_SCOUT_SET = 3;
     private static final short MESSAGE_TEAM_CHANGE = 4;
     private static final short MESSAGE_TEAM_SET = 5;
+    private static final short MESSAGE_TEAM_REQUEST = 6;
 
     private ScoutClient mClient;
     private BluetoothSocket mSocket;
@@ -75,6 +83,10 @@ class ClientHandlerThread extends Thread {
                     case MESSAGE_TEAM_CHANGE:
                         Log.v(TAG, "Processing Team In");
                         teamIn();
+                        break;
+                    case MESSAGE_TEAM_REQUEST:
+                        Log.v(TAG, "Processing Team Request");
+
                         break;
                 }
             } catch (IOException e) {
@@ -200,6 +212,26 @@ class ClientHandlerThread extends Thread {
         mClient.handleEvent(task, ClientHandlerTask.EVENT_TEAM_CHANGE);
     }
 
+    private void teamRequest() throws IOException {
+        // First byte is a byte representing the Alliance Color of the client
+        byte alliance = readByte();
+        // Next byte represents the position of the client
+        byte client = readByte();
+        // Next 2 bytes are a short representing the match number to queue
+        short match = readShort();
+    }
+
+    private void sendTeam(int team) throws IOException {
+        writeShort(MESSAGE_SCOUT_SET);
+        writeInt(team);
+    }
+
+    private byte readByte() throws IOException {
+        byte[] byteTmp = new byte[1];
+        mInputStream.read(byteTmp);
+        return byteTmp[0];
+    }
+
     private short readShort() throws IOException {
         byte[] shortTmp = new byte[2];
         mInputStream.read(shortTmp);
@@ -207,10 +239,22 @@ class ClientHandlerThread extends Thread {
         return bb.getShort();
     }
 
+    private void writeShort(short in) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocate(2);
+        bb.putShort(in);
+        mOutputStream.write(bb.array());
+    }
+
     private int readInt() throws IOException {
         byte[] intTmp = new byte[4];
         mInputStream.read(intTmp);
         ByteBuffer bb = ByteBuffer.wrap(intTmp);
         return bb.getInt();
+    }
+
+    private void writeInt(int in) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.putInt(in);
+        mOutputStream.write(bb.array());
     }
 }
