@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
@@ -23,7 +22,6 @@ import android.view.MenuItem;
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
 import com.walpolerobotics.scouting.scoutingserver.dialog.BluetoothNotEnabledDialog;
 import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDialog;
-import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothBroadcastReceiver;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean bluetoothSetup = false;
 
-    private BroadcastReceiver mReceiver;
     private ServerService mService;
 
     @Override
@@ -58,12 +55,6 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        mReceiver = new BluetoothBroadcastReceiver(mService);
-        registerReceiver(mReceiver, filter);
-
         Intent intent = new Intent(this, ServerService.class);
         startService(intent);
         bindService(intent, mConnection, BIND_AUTO_CREATE);
@@ -72,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-
-        unregisterReceiver(mReceiver);
 
         if (mConnection != null) {
             unbindService(mConnection);
