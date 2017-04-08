@@ -1,21 +1,13 @@
 package com.walpolerobotics.scouting.scoutingserver.adapter;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -73,9 +65,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
             @Override
             public void onDisconnected() {
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
-                mDialog = DeviceDisconnectedDialog.createDialog(device.getName());
-                FragmentManager fm = mContext.getSupportFragmentManager();
-                mDialog.show(fm, "deviceDisconnectedDialog");
+                if (!mContext.isDestroyed()) {
+                    mDialog = DeviceDisconnectedDialog.createDialog(device.getName());
+                    FragmentManager fm = mContext.getSupportFragmentManager();
+                    mDialog.show(fm, "deviceDisconnectedDialog");
+                }
             }
         });
     }

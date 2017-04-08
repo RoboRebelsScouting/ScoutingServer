@@ -1,7 +1,6 @@
 package com.walpolerobotics.scouting.scoutingserver.fragment;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -18,6 +17,10 @@ import android.view.ViewGroup;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 import com.walpolerobotics.scouting.scoutingserver.ServerService;
+import com.walpolerobotics.scouting.scoutingserver.adapter.DeviceAdapter;
+import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
+
+import java.util.ArrayList;
 
 public class DevicesFragment extends Fragment {
 
@@ -61,10 +64,28 @@ public class DevicesFragment extends Fragment {
         mList = (RecyclerView) view.findViewById(R.id.recyclerView);
         mList.setLayoutManager(new LinearLayoutManager(getContext()));
         if (mService != null) {
-            mList.setAdapter(mService.getListAdapter((AppCompatActivity) getActivity()));
+            initListAdapter();
         }
 
         return view;
+    }
+
+    private void initListAdapter() {
+        ArrayList<ScoutClient> clients = mService.getClientList();
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        final DeviceAdapter adapter = new DeviceAdapter(activity, clients);
+        mService.setOnClientListChangedListener(new ServerService.OnClientListChanged() {
+            @Override
+            public void onClientAdded(int pos) {
+                adapter.notifyItemInserted(pos);
+            }
+
+            @Override
+            public void onClientRemoved(int pos) {
+                adapter.notifyItemRemoved(pos);
+            }
+        });
+        mList.setAdapter(adapter);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -77,7 +98,7 @@ public class DevicesFragment extends Fragment {
             ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
             mService = binder.getInstance();
             if (mList != null) {
-                mList.setAdapter(mService.getListAdapter((AppCompatActivity) getActivity()));
+                initListAdapter();
             }
         }
     };

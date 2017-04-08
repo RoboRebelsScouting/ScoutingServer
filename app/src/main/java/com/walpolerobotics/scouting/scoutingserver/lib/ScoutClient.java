@@ -60,6 +60,9 @@ public class ScoutClient {
                                 FileTransferErrorListener.REASON_CHECKSUM_NOT_EQUAL);
                     }
                     break;
+                case ClientHandlerTask.EVENT_SOCKET_DISCONNECT:
+                    notifyDisconnect();
+                    break;
             }
         }
     };
@@ -160,7 +163,7 @@ public class ScoutClient {
         mThread.disconnect();
     }
 
-    public void notifyDisconnect() {
+    private void notifyDisconnect() {
         if (mStateListener != null) {
             mStateListener.onDisconnected();
         }

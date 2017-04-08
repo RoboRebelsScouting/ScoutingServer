@@ -27,7 +27,7 @@ public class ServerService extends Service {
     private IBinder mBinder = new ServerBinder();
 
     private ArrayList<ScoutClient> mClients = new ArrayList<>();
-    private DeviceAdapter mListAdapter;
+    private OnClientListChanged mClientListener;
 
     private ClientAcceptThread mAcceptThread;
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -82,14 +82,6 @@ public class ServerService extends Service {
         Log.v(TAG, "Service destroyed");
     }
 
-    public DeviceAdapter getListAdapter(AppCompatActivity context) {
-        if (mListAdapter == null) {
-            mListAdapter = new DeviceAdapter(context, mClients);
-        }
-
-        return mListAdapter;
-    }
-
     public void searchForDevices() {
         if (mAcceptThread == null || !mAcceptThread.isAlive()) {
             mAcceptThread = new ClientAcceptThread(this);
@@ -97,8 +89,12 @@ public class ServerService extends Service {
         }
     }
 
+    public void setOnClientListChangedListener(OnClientListChanged listener) {
+        mClientListener = listener;
+    }
+
     public ArrayList<ScoutClient> getClientList() {
-        return mListAdapter.getDeviceList();
+        return mClients;
     }
 
     public void cancelSearch() {
@@ -121,15 +117,15 @@ public class ServerService extends Service {
 
     private void registerClient(ScoutClient client) {
         mClients.add(client);
-        if (mListAdapter != null) {
-            mListAdapter.notifyItemInserted(mClients.size() - 1);
+        if (mClientListener != null) {
+            mClientListener.onClientAdded(mClients.size() - 1);
         }
     }
 
     private void removeClient(int pos) {
         mClients.remove(pos);
-        if (mListAdapter != null) {
-            mListAdapter.notifyItemRemoved(pos);
+        if (mClientListener != null) {
+            mClientListener.onClientRemoved(pos);
         }
     }
 
@@ -137,5 +133,10 @@ public class ServerService extends Service {
         public ServerService getInstance() {
             return ServerService.this;
         }
+    }
+
+    public interface OnClientListChanged {
+        void onClientAdded(int pos);
+        void onClientRemoved(int pos);
     }
 }

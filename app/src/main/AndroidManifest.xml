@@ -21,14 +21,6 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".lib.BluetoothBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
-            </intent-filter>
-        </receiver>
-
         <service
             android:name=".ServerService"
             android:enabled="true"

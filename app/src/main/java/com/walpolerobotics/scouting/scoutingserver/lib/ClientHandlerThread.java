@@ -17,6 +17,8 @@ public class ClientHandlerThread extends Thread {
 
     private static final String TAG = "ClientHandlerThread";
 
+    private static final String SOCKET_DISCONNECTED_MESSAGE = "bt socket closed, read return: -1";
+
     private static final String FILE_WRITE_LOCATION = "Scouting";
     private static final int FILE_MAX_BYTE_SIZE = 16000;
 
@@ -78,6 +80,9 @@ public class ClientHandlerThread extends Thread {
                         break;
                 }
             } catch (IOException e) {
+                if (e.getMessage().equals(SOCKET_DISCONNECTED_MESSAGE)) {
+                    mClient.handleEvent(null, ClientHandlerTask.EVENT_SOCKET_DISCONNECT);
+                }
                 e.printStackTrace();
                 break;
             }
