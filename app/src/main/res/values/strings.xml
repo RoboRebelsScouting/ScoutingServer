@@ -9,6 +9,7 @@
 
     <string name="notification_title">Scouting Server</string>
     <string name="notification_msg">Server is running</string>
+    <string name="notification_action_stop">Stop Server</string>
 
     <string name="dialog_disconnected_title">Bluetooth Device Disconnected</string>
     <string name="dialog_disconnected_msg">The previously connected client &lt;b>%1$s&lt;/b>

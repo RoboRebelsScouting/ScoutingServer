@@ -2,8 +2,6 @@ package com.walpolerobotics.scouting.scoutingserver;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -20,7 +18,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
-import com.walpolerobotics.scouting.scoutingserver.dialog.BluetoothNotEnabledDialog;
 import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDialog;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,16 +45,25 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
-        preSetupBluetooth();
+        Bundle args = getIntent().getExtras();
+        if (args != null && args.getBoolean("requestStopService")) {
+            Intent intent = new Intent(this, ServerService.class);
+            stopService(intent);
+            finish();
+        } else {
+            preSetupBluetooth();
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        Intent intent = new Intent(this, ServerService.class);
-        startService(intent);
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
+        if (bluetoothSetup) {
+            Intent intent = new Intent(this, ServerService.class);
+            startService(intent);
+            bindService(intent, mConnection, BIND_AUTO_CREATE);
+        }
     }
 
     @Override
@@ -115,10 +121,12 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK) {
                     Log.i(TAG, "Bluetooth is enabled");
                     bluetoothSetup = true;
+                    Intent intent = new Intent(this, ServerService.class);
+                    startService(intent);
+                    bindService(intent, mConnection, BIND_AUTO_CREATE);
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     Log.e(TAG, "Bluetooth is disabled");
-                    FragmentManager fm = getSupportFragmentManager();
-                    new BluetoothNotEnabledDialog().show(fm, "bluetoothNotEnabled");
+                    finish();
                 }
                 break;
         }

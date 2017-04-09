@@ -4,15 +4,15 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import com.walpolerobotics.scouting.scoutingserver.adapter.DeviceAdapter;
 import com.walpolerobotics.scouting.scoutingserver.lib.ClientAcceptTask;
 import com.walpolerobotics.scouting.scoutingserver.lib.ClientAcceptThread;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
@@ -58,11 +58,24 @@ public class ServerService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Notification notification = new Notification.Builder(this)
+        Intent actionIntent = new Intent(this, MainActivity.class);
+        actionIntent.putExtra("requestStopService", true);
+        PendingIntent actionPendingIntent = PendingIntent.getActivity(this, 0, actionIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Resources res = getResources();
+        String actionTitle = res.getString(R.string.notification_action_stop);
+
+        NotificationCompat.Action action =
+                new NotificationCompat.Action.Builder(R.drawable.ic_close_black_24dp, actionTitle,
+                        actionPendingIntent).build();
+
+        Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle(getText(R.string.notification_title))
                 .setContentText(getText(R.string.notification_msg))
                 .setSmallIcon(R.drawable.ic_find_replace_white_24px)
                 .setContentIntent(pendingIntent)
+                .addAction(action)
                 .build();
 
         startForeground(ONGOING_NOTIFICATION_ID, notification);
@@ -80,6 +93,10 @@ public class ServerService extends Service {
     @Override
     public void onDestroy() {
         Log.v(TAG, "Service destroyed");
+        cancelSearch();
+        for (ScoutClient client : mClients) {
+            client.disconnect();
+        }
     }
 
     public void searchForDevices() {
