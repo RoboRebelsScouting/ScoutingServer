@@ -2,12 +2,10 @@ package com.walpolerobotics.scouting.scoutingserver;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -20,14 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
-import com.walpolerobotics.scouting.scoutingserver.dialog.BluetoothNotEnabledDialog;
 import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDialog;
-import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothBroadcastReceiver;
-import com.walpolerobotics.scouting.scoutingserver.lib.BluetoothManager;
-import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
-
-import java.io.IOException;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean bluetoothSetup = false;
 
-    private BroadcastReceiver mReceiver;
+    private ServerService mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,31 +45,53 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
-        preSetupBluetooth();
+        Bundle args = getIntent().getExtras();
+        if (args != null && args.getBoolean("requestStopService")) {
+            Intent intent = new Intent(this, ServerService.class);
+            stopService(intent);
+            finish();
+        } else {
+            preSetupBluetooth();
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        mReceiver = new BluetoothBroadcastReceiver();
-        registerReceiver(mReceiver, filter);
+        if (bluetoothSetup) {
+            Intent intent = new Intent(this, ServerService.class);
+            startService(intent);
+            bindService(intent, mConnection, BIND_AUTO_CREATE);
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        unregisterReceiver(mReceiver);
+        if (mConnection != null) {
+            unbindService(mConnection);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
+        if (mService != null) {
+            Log.v(TAG, "Changing action button icon");
+            MenuItem item = menu.findItem(R.id.itemSearch);
+            if (mService.isSearching()) {
+                Log.v(TAG, "We are already searching");
+                item.setIcon(R.drawable.ic_stop_white_24px);
+            } else {
+                Log.v(TAG, "We are not yet searching");
+                item.setIcon(R.drawable.ic_find_replace_white_24px);
+            }
+        }
+
         return true;
     }
 
@@ -86,13 +99,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.itemSearch:
-                if (bluetoothSetup) {
-                    BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
-                    if (bluetoothManager.isSearching()) {
-                        bluetoothManager.cancelSearch();
+                if (bluetoothSetup && mService != null) {
+                    if (mService.isSearching()) {
+                        mService.cancelSearch();
                         item.setIcon(R.drawable.ic_find_replace_white_24px);
                     } else {
-                        bluetoothManager.searchForDevices();
+                        mService.searchForDevices();
                         item.setIcon(R.drawable.ic_stop_white_24px);
                     }
                 }
@@ -109,10 +121,12 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == Activity.RESULT_OK) {
                     Log.i(TAG, "Bluetooth is enabled");
                     bluetoothSetup = true;
+                    Intent intent = new Intent(this, ServerService.class);
+                    startService(intent);
+                    bindService(intent, mConnection, BIND_AUTO_CREATE);
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     Log.e(TAG, "Bluetooth is disabled");
-                    FragmentManager fm = getSupportFragmentManager();
-                    new BluetoothNotEnabledDialog().show(fm, "bluetoothNotEnabled");
+                    finish();
                 }
                 break;
         }
@@ -138,4 +152,16 @@ public class MainActivity extends AppCompatActivity {
 
         bluetoothSetup = true;
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
+            mService = binder.getInstance();
+        }
+    };
 }

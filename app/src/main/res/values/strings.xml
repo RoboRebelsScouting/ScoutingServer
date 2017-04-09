@@ -7,18 +7,19 @@
     <string name="alliance_red">Red Alliance</string>
     <string name="alliance_blue">Blue Alliance</string>
 
-    <string name="dialog_file_error_title">Error Transferring File</string>
-    <string name="dialog_file_error_checksum_msg">The file checksums did not match so the file
-    &lt;b>%1$s&lt;/b> was not saved.</string>
-    <string name="dialog_file_error_external_msg">The external file system is busy so the file
-    &lt;b>%1$s&lt;/b> was not saved.</string>
+    <string name="notification_title">Scouting Server</string>
+    <string name="notification_msg">Server is running</string>
+    <string name="notification_action_stop">Stop Server</string>
+
     <string name="dialog_disconnected_title">Bluetooth Device Disconnected</string>
     <string name="dialog_disconnected_msg">The previously connected client &lt;b>%1$s&lt;/b>
     has disconnected.</string>
     <string name="dialog_no_bluetooth_title">No Bluetooth Support</string>
     <string name="dialog_no_bluetooth_msg">This device has no Bluetooth support. Press OK to close
     the app.</string>
-    <string name="dialog_bluetooth_disabled_title">Bluetooth Disabled</string>
-    <string name="dialog_bluetooth_disabled_msg">In order for this app to work properly, you must
-    turn Bluetooth on. Press OK to close the app.</string>
+    <string name="dialog_file_error_title">Error Transferring File</string>
+    <string name="dialog_file_error_checksum_msg">The file checksums did not match so the file
+    &lt;b>%1$s&lt;/b> was not saved.</string>
+    <string name="dialog_file_error_external_msg">The external file system is busy so the file
+    &lt;b>%1$s&lt;/b> was not saved.</string>
 </resources>

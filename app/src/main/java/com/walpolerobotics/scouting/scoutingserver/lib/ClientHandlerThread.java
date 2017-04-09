@@ -20,9 +20,11 @@ import java.nio.ShortBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-class ClientHandlerThread extends Thread {
+public class ClientHandlerThread extends Thread {
 
     private static final String TAG = "ClientHandlerThread";
+
+    private static final String SOCKET_DISCONNECTED_MESSAGE = "bt socket closed, read return: -1";
 
     private static final String FILE_WRITE_LOCATION = "Scouting";
     private static final int FILE_MAX_BYTE_SIZE = 16000;
@@ -39,7 +41,7 @@ class ClientHandlerThread extends Thread {
     private InputStream mInputStream;
     private OutputStream mOutputStream;
 
-    ClientHandlerThread(ScoutClient client, BluetoothSocket socket) {
+    public ClientHandlerThread(ScoutClient client, BluetoothSocket socket) {
         mClient = client;
         setSocket(socket);
     }
@@ -90,6 +92,9 @@ class ClientHandlerThread extends Thread {
                         break;
                 }
             } catch (IOException e) {
+                if (e.getMessage().equals(SOCKET_DISCONNECTED_MESSAGE)) {
+                    mClient.handleEvent(null, ClientHandlerTask.EVENT_SOCKET_DISCONNECT);
+                }
                 e.printStackTrace();
                 break;
             }

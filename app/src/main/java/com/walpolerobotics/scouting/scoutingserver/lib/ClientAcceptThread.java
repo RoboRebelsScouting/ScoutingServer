@@ -6,18 +6,22 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.walpolerobotics.scouting.scoutingserver.ServerService;
+
 import java.io.IOException;
 import java.util.UUID;
 
-class ClientAcceptThread extends Thread {
+public class ClientAcceptThread extends Thread {
 
     private static final String TAG = "AcceptThread";
     private static final UUID ID = UUID.fromString("35c2ad3a-14dc-11e7-93ae-92361f002671");
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothServerSocket mServerSocket;
+    private ServerService mService;
 
-    ClientAcceptThread() {
+    public ClientAcceptThread(ServerService service) {
+        mService = service;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
@@ -32,8 +36,7 @@ class ClientAcceptThread extends Thread {
                 try {
                     BluetoothSocket socket = mServerSocket.accept();
                     BluetoothDevice device = socket.getRemoteDevice();
-                    BluetoothManager bluetoothManager = BluetoothManager.getBluetoothManager();
-                    for (ScoutClient client : bluetoothManager.getClientList()) {
+                    for (ScoutClient client : mService.getClientList()) {
                         BluetoothDevice clientDevice = client.getBluetoothDevice();
                         String clientAddress = clientDevice.getAddress();
                         if (clientAddress.equals(device.getAddress())) {
@@ -41,7 +44,7 @@ class ClientAcceptThread extends Thread {
                             ClientAcceptTask task = new ClientAcceptTask();
                             task.client = client;
                             task.socket = socket;
-                            bluetoothManager.handleAcceptedClient(task,
+                            mService.handleAcceptedClient(task,
                                     ClientAcceptTask.EVENT_RECONNECT);
                             continue iteration;
                         }
@@ -49,7 +52,7 @@ class ClientAcceptThread extends Thread {
                     Log.v(TAG, "Accepted new client: " + device.getName());
                     ClientAcceptTask task = new ClientAcceptTask();
                     task.client = new ScoutClient(socket);
-                    bluetoothManager.handleAcceptedClient(task, ClientAcceptTask.EVENT_ACCEPT_NEW);
+                    mService.handleAcceptedClient(task, ClientAcceptTask.EVENT_ACCEPT_NEW);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -60,7 +63,7 @@ class ClientAcceptThread extends Thread {
         }
     }
 
-    void cancelClientAccept() {
+    public void cancelClientAccept() {
         interrupt();
         if (mServerSocket != null) {
             try {
