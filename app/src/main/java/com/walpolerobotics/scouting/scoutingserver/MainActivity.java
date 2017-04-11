@@ -45,14 +45,7 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
-        Bundle args = getIntent().getExtras();
-        if (args != null && args.getBoolean("requestStopService")) {
-            Intent intent = new Intent(this, ServerService.class);
-            stopService(intent);
-            finish();
-        } else {
-            preSetupBluetooth();
-        }
+        preSetupBluetooth();
     }
 
     @Override
@@ -108,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
                         item.setIcon(R.drawable.ic_stop_white_24px);
                     }
                 }
+                return true;
+            case R.id.scheduleActivity:
+                Intent intent = new Intent(this, EventScheduleActivity.class);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -16,22 +16,16 @@ import javax.net.ssl.HttpsURLConnection;
 public class FRCApi {
 
     private static final String SEASON = "2017";
-    // TODO: Add this to a settings section of the app
-    /**
-     * Event Code representing the event to pull match schedule from
-     * New England District Championship: NECMP
-     * FIRST Championship - St. Louis: CMPMO
-     */
-    private static final String EVENT_CODE = "NECMP";
-    /**
-     * Tournament Level to filter the desired match schedule
-     * Possible Values: qual, playoff
-     */
-    private static final String TOURNAMENT_LEVEL = "qual";
+
+    // Event Code representing the event to pull match schedule from
+    public static final String EVENT_CODE_NE_DISTRICT = "NECMP";
+    public static final String EVENT_CODE_ST_LOUIS = "CMPMO";
+
+    // Tournament Level to filter the desired match schedule
+    public static final String TOURNAMENT_LEVEL_QUALIFICATIONS = "qual";
+    public static final String TOURNAMENT_LEVEL_PLAYOFF = "playoff";
 
     private static final String API_BASE = "https://frc-api.firstinspires.org/v2.0/" + SEASON;
-    private static final String API_MATCH_SCHEDULE = "/schedule/" + EVENT_CODE + "?tournamentLevel="
-            + TOURNAMENT_LEVEL;
 
     private String mApiKey;
 
@@ -39,11 +33,12 @@ public class FRCApi {
         mApiKey = apiKey;
     }
 
-    public void downloadMatchFile(final MatchFileDownloadedCallback callback) {
+    public void downloadMatchFile(final String event, final String level,
+                                  final MatchFileDownloadedCallback callback) {
         new AsyncTask<Void, Void, JSONObject>() {
             @Override
             protected JSONObject doInBackground(Void... params) {
-                return downloadMatchFile();
+                return downloadMatchFile(event, level);
             }
 
             @Override
@@ -54,10 +49,13 @@ public class FRCApi {
     }
 
     @WorkerThread
-    private JSONObject downloadMatchFile() {
+    private JSONObject downloadMatchFile(String event, String level) {
         try {
-            URL url = new URL(API_BASE + API_MATCH_SCHEDULE);
+            String matchSchedule = "/schedule/" + event + "?tournamentLevel=" + level;
+            URL url = new URL(API_BASE + matchSchedule);
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn.setRequestProperty("Authorization", "Basic " + mApiKey);
+            conn.setRequestProperty("Accept", "application/JSON");
             conn.setRequestMethod("GET");
 
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -76,6 +74,6 @@ public class FRCApi {
     }
 
     public interface MatchFileDownloadedCallback {
-        JSONObject onMatchFileDownloaded(JSONObject file);
+        void onMatchFileDownloaded(JSONObject file);
     }
 }

@@ -49,19 +49,17 @@ public class ServerService extends Service {
     public ServerService() {
     }
 
+
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.v(TAG, "Service Intent received");
-        Log.v(TAG, "onStartCommand - Accept Thread: " + mAcceptThread);
-        Log.v(TAG, "this: " + this.hashCode());
+    public void onCreate() {
+        super.onCreate();
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Intent actionIntent = new Intent(this, MainActivity.class);
-        actionIntent.putExtra("requestStopService", true);
-        PendingIntent actionPendingIntent = PendingIntent.getActivity(this, 0, actionIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent actionIntent = new Intent(this, ServerService.class);
+        actionIntent.setAction("requestStopService");
+        PendingIntent actionPendingIntent = PendingIntent.getService(this, 0, actionIntent, 0);
 
         Resources res = getResources();
         String actionTitle = res.getString(R.string.notification_action_stop);
@@ -79,6 +77,17 @@ public class ServerService extends Service {
                 .build();
 
         startForeground(ONGOING_NOTIFICATION_ID, notification);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            String action = intent.getAction();
+            if (action != null && action.equals("requestStopService")) {
+                Log.v(TAG, "Stopping service");
+                stopForeground(true);
+            }
+        }
 
         return START_STICKY;
     }

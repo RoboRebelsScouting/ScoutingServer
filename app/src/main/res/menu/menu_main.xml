@@ -6,4 +6,8 @@
         android:icon="@drawable/ic_find_replace_white_24px"
         android:title="@string/menu_search"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/scheduleActivity"
+        android:title="@string/menu_schedule"
+        app:showAsAction="never" />
 </menu>
