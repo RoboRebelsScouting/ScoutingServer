@@ -51,7 +51,7 @@ public class ClientAcceptThread extends Thread {
                     }
                     Log.v(TAG, "Accepted new client: " + device.getName());
                     ClientAcceptTask task = new ClientAcceptTask();
-                    task.client = new ScoutClient(socket);
+                    task.client = new ScoutClient(socket, mService);
                     mService.handleAcceptedClient(task, ClientAcceptTask.EVENT_ACCEPT_NEW);
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -1,6 +1,5 @@
 package com.walpolerobotics.scouting.scoutingserver.lib;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -8,29 +7,34 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
-import com.walpolerobotics.scouting.scoutingserver.dialog.DeviceDisconnectedDialog;
+import com.walpolerobotics.scouting.scoutingserver.ServerService;
+
+import java.util.ArrayList;
 
 public class ScoutClient {
 
-    private static final String TAG = "ScoutClient";
-
     public static final int ALLIANCE_RED = 0;
     public static final int ALLIANCE_BLUE = 1;
-
     public static final int POSITION_1 = 0;
     public static final int POSITION_2 = 1;
     public static final int POSITION_3 = 2;
-
     public static final int STATE_CONNECTED = 0;
     public static final int STATE_DISCONNECTED = 1;
-
+    private static final String TAG = "ScoutClient";
     private final BluetoothDevice mDevice;
+    private ServerService mParentService;
     private ClientHandlerThread mThread;
+    private int mState;
+    private ArrayList<ClientStateChangeListener> mStateListeners = new ArrayList<>();
+    private String mScout;
+    private ScoutNameChangeListener mScoutListener;
+    private int mTeam;
+    private TargetTeamChangeListener mTeamListener;
+    private FileTransferErrorListener mFileErrorListener;
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
@@ -60,25 +64,21 @@ public class ScoutClient {
                                 FileTransferErrorListener.REASON_CHECKSUM_NOT_EQUAL);
                     }
                     break;
-                case ClientHandlerTask.EVENT_SOCKET_DISCONNECT:
+                case ClientHandlerTask.EVENT_SOCKET_DISCONNECTED:
                     notifyDisconnect();
+                    break;
+                case ClientHandlerTask.EVENT_SOCKET_DISCONNECT:
+                    disconnect();
                     break;
             }
         }
     };
-
-    private int mState;
-    private ClientStateChangeListener mStateListener;
-    private String mScout;
-    private ScoutNameChangeListener mScoutListener;
-    private int mTeam;
-    private TargetTeamChangeListener mTeamListener;
-    private FileTransferErrorListener mFileErrorListener;
     private int mAlliance;
     private int mPosition;
 
-    public ScoutClient(BluetoothSocket socket) {
+    public ScoutClient(BluetoothSocket socket, ServerService service) {
         mDevice = socket.getRemoteDevice();
+        mParentService = service;
         initHandlerThread(socket);
     }
 
@@ -143,8 +143,16 @@ public class ScoutClient {
         return mState;
     }
 
-    public void setClientStateChangeListener(ClientStateChangeListener listener) {
-        mStateListener = listener;
+    public void addClientStateChangeListener(ClientStateChangeListener listener) {
+        mStateListeners.add(listener);
+        Log.v(TAG, "Added a client state change listener, current length: " +
+                mStateListeners.size());
+    }
+
+    public void removeClientStateChangeListener(ClientStateChangeListener listener) {
+        mStateListeners.remove(listener);
+        Log.v(TAG, "Removed a client state change listener, current length: " +
+                mStateListeners.size());
     }
 
     public void setScoutListener(ScoutNameChangeListener listener) {
@@ -160,14 +168,15 @@ public class ScoutClient {
     }
 
     public void disconnect() {
-        mThread.disconnect();
+        mThread.stopLoop();
+        mParentService.removeClient(this);
     }
 
     private void notifyDisconnect() {
-        if (mStateListener != null) {
-            mStateListener.onDisconnected();
-        }
         mState = STATE_DISCONNECTED;
+        for (ClientStateChangeListener listener : mStateListeners) {
+            listener.onDisconnected(this);
+        }
     }
 
     public void setNewBluetoothSocket(BluetoothSocket socket) {
@@ -178,10 +187,10 @@ public class ScoutClient {
     private void initHandlerThread(BluetoothSocket socket) {
         mThread = new ClientHandlerThread(this, socket);
         mThread.start();
-        if (mStateListener != null) {
-            mStateListener.onConnected();
-        }
         mState = STATE_CONNECTED;
+        for (ClientStateChangeListener listener : mStateListeners) {
+            listener.onConnected(this);
+        }
     }
 
     void handleEvent(ClientHandlerTask task, int state) {
@@ -190,8 +199,9 @@ public class ScoutClient {
     }
 
     public interface ClientStateChangeListener {
-        void onConnected();
-        void onDisconnected();
+        void onConnected(ScoutClient client);
+
+        void onDisconnected(ScoutClient client);
     }
 
     public interface ScoutNameChangeListener {

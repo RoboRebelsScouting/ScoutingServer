@@ -1,9 +1,7 @@
 package com.walpolerobotics.scouting.scoutingserver.adapter;
 
 import android.bluetooth.BluetoothDevice;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,18 +10,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
-import com.walpolerobotics.scouting.scoutingserver.dialog.DeviceDisconnectedDialog;
-import com.walpolerobotics.scouting.scoutingserver.dialog.FileTransferErrorDialog;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
 
-    private AppCompatActivity mContext;
+    private Context mContext;
     private ArrayList<ScoutClient> mDevices;
+    private HashMap<ScoutClient, ScoutClient.ClientStateChangeListener> mStateListeners =
+            new HashMap<>();
 
-    public DeviceAdapter(AppCompatActivity context, ArrayList<ScoutClient> devices) {
+    public DeviceAdapter(Context context, ArrayList<ScoutClient> devices) {
         mContext = context;
         mDevices = devices;
     }
@@ -49,39 +48,22 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
             case ScoutClient.STATE_DISCONNECTED:
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
                 break;
-
         }
-        client.setClientStateChangeListener(new ScoutClient.ClientStateChangeListener() {
-
-            private DialogFragment mDialog;
+        ScoutClient.ClientStateChangeListener listener = new ScoutClient
+                .ClientStateChangeListener() {
 
             @Override
-            public void onConnected() {
+            public void onConnected(ScoutClient client) {
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
-                if (mDialog != null) {
-                    mDialog.dismiss();
-                }
             }
 
             @Override
-            public void onDisconnected() {
+            public void onDisconnected(ScoutClient client) {
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
-                if (!mContext.isDestroyed()) {
-                    mDialog = DeviceDisconnectedDialog.createDialog(device.getName());
-                    FragmentManager fm = mContext.getSupportFragmentManager();
-                    mDialog.show(fm, "deviceDisconnectedDialog");
-                }
             }
-        });
-        client.setFileTransferErrorListener(new ScoutClient.FileTransferErrorListener() {
-            @Override
-            public void onFileTransferError(String fileName, int reason) {
-                FileTransferErrorDialog dialog = FileTransferErrorDialog.createDialog(reason,
-                        fileName);
-                FragmentManager fm = mContext.getSupportFragmentManager();
-                dialog.show(fm, "fileTransferErrorDialog");
-            }
-        });
+        };
+        client.addClientStateChangeListener(listener);
+        mStateListeners.put(client, listener);
     }
 
     @Override
@@ -89,8 +71,10 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         return mDevices.size();
     }
 
-    public ArrayList<ScoutClient> getDeviceList() {
-        return mDevices;
+    public void onDestroyView() {
+        for (ScoutClient client : mDevices) {
+            client.removeClientStateChangeListener(mStateListeners.get(client));
+        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

@@ -2,7 +2,6 @@ package com.walpolerobotics.scouting.scoutingserver.lib;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -11,12 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.nio.ShortBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -93,7 +86,11 @@ public class ClientHandlerThread extends Thread {
                 }
             } catch (IOException e) {
                 if (e.getMessage().equals(SOCKET_DISCONNECTED_MESSAGE)) {
+                    mClient.handleEvent(null, ClientHandlerTask.EVENT_SOCKET_DISCONNECTED);
+                } else {
                     mClient.handleEvent(null, ClientHandlerTask.EVENT_SOCKET_DISCONNECT);
+                    Log.e(TAG, "IOException occurred, deliberately dropping connection with " +
+                            "client");
                 }
                 e.printStackTrace();
                 break;
@@ -102,7 +99,7 @@ public class ClientHandlerThread extends Thread {
         Log.v(TAG, "Loop broken");
     }
 
-    void disconnect() {
+    void stopLoop() {
         interrupt();
 
         try {

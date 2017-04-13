@@ -2,15 +2,16 @@ package com.walpolerobotics.scouting.scoutingserver;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -18,9 +19,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.MainTabAdapter;
+import com.walpolerobotics.scouting.scoutingserver.dialog.DeviceDisconnectedDialog;
 import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDialog;
+import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class MainActivity extends AppCompatActivity implements ScoutClient.ClientStateChangeListener,
+        ServerService.OnClientListChanged {
 
     private static final String TAG = "MainActivity";
 
@@ -29,6 +36,25 @@ public class MainActivity extends AppCompatActivity {
     private boolean bluetoothSetup = false;
 
     private ServerService mService;
+    private HashMap<ScoutClient, DeviceDisconnectedDialog> mDialogs = new HashMap<>();
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
+            mService = binder.getInstance();
+
+            mService.addOnClientListChangedListener(MainActivity.this);
+
+            ArrayList<ScoutClient> clients = mService.getClientList();
+            for (ScoutClient client : clients) {
+                client.addClientStateChangeListener(MainActivity.this);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +88,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
+
+        if (mService != null) {
+            mService.removeOnClientListChangedListener(MainActivity.this);
+
+            ArrayList<ScoutClient> clients = mService.getClientList();
+            for (ScoutClient client : clients) {
+                client.removeClientStateChangeListener(MainActivity.this);
+            }
+        }
 
         if (mConnection != null) {
             unbindService(mConnection);
@@ -150,15 +185,32 @@ public class MainActivity extends AppCompatActivity {
         bluetoothSetup = true;
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
+    @Override
+    public void onConnected(ScoutClient client) {
+        DeviceDisconnectedDialog dialog = mDialogs.get(client);
+        if (dialog != null) {
+            dialog.dismiss();
         }
+    }
 
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
-            mService = binder.getInstance();
-        }
-    };
+    @Override
+    public void onDisconnected(ScoutClient client) {
+        BluetoothDevice device = client.getBluetoothDevice();
+        DeviceDisconnectedDialog dialog = DeviceDisconnectedDialog.createDialog(device
+                .getName());
+        mDialogs.put(client, dialog);
+        FragmentManager fm = getSupportFragmentManager();
+        dialog.show(fm, "deviceDisconnectedDialog");
+    }
+
+    @Override
+    public void onClientAdded(int pos) {
+        ScoutClient client = mService.getClientList().get(pos);
+        client.addClientStateChangeListener(this);
+    }
+
+    @Override
+    public void onClientRemoved(int pos) {
+
+    }
 }

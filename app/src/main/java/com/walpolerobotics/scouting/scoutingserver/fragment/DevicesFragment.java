@@ -7,10 +7,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +20,29 @@ import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
 
-public class DevicesFragment extends Fragment {
-
-    private static final String TAG = "DevicesFragment";
+public class DevicesFragment extends Fragment implements ServerService.OnClientListChanged {
 
     public static final int POSITION = 0;
     public static final String FRAGMENT_TITLE = "Devices";
-
+    private static final String TAG = "DevicesFragment";
     private ServerService mService;
 
     private RecyclerView mList;
+    private DeviceAdapter mAdapter;
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
+            mService = binder.getInstance();
+            if (mList != null) {
+                initListAdapter();
+            }
+        }
+    };
 
     public DevicesFragment() {
     }
@@ -70,36 +81,31 @@ public class DevicesFragment extends Fragment {
         return view;
     }
 
-    private void initListAdapter() {
-        ArrayList<ScoutClient> clients = mService.getClientList();
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        final DeviceAdapter adapter = new DeviceAdapter(activity, clients);
-        mService.setOnClientListChangedListener(new ServerService.OnClientListChanged() {
-            @Override
-            public void onClientAdded(int pos) {
-                adapter.notifyItemInserted(pos);
-            }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
 
-            @Override
-            public void onClientRemoved(int pos) {
-                adapter.notifyItemRemoved(pos);
-            }
-        });
-        mList.setAdapter(adapter);
+        if (mService != null) {
+            mService.removeOnClientListChangedListener(this);
+        }
+
+        mAdapter.onDestroyView();
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private void initListAdapter() {
+        ArrayList<ScoutClient> clients = mService.getClientList();
+        mAdapter = new DeviceAdapter(getContext(), clients);
+        mService.addOnClientListChangedListener(this);
+        mList.setAdapter(mAdapter);
+    }
 
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-        }
+    @Override
+    public void onClientAdded(int pos) {
+        mAdapter.notifyItemInserted(pos);
+    }
 
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            ServerService.ServerBinder binder = (ServerService.ServerBinder) service;
-            mService = binder.getInstance();
-            if (mList != null) {
-                initListAdapter();
-            }
-        }
-    };
+    @Override
+    public void onClientRemoved(int pos) {
+        mAdapter.notifyItemRemoved(pos);
+    }
 }

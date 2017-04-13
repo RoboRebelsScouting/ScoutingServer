@@ -27,7 +27,7 @@ public class ServerService extends Service {
     private IBinder mBinder = new ServerBinder();
 
     private ArrayList<ScoutClient> mClients = new ArrayList<>();
-    private OnClientListChanged mClientListener;
+    private ArrayList<OnClientListChanged> mClientListeners = new ArrayList<>();
 
     private ClientAcceptThread mAcceptThread;
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -86,6 +86,7 @@ public class ServerService extends Service {
             if (action != null && action.equals("requestStopService")) {
                 Log.v(TAG, "Stopping service");
                 stopForeground(true);
+                stopSelf();
             }
         }
 
@@ -115,8 +116,16 @@ public class ServerService extends Service {
         }
     }
 
-    public void setOnClientListChangedListener(OnClientListChanged listener) {
-        mClientListener = listener;
+    public void addOnClientListChangedListener(OnClientListChanged listener) {
+        mClientListeners.add(listener);
+        Log.v(TAG, "Added a client list change listener, current length: " +
+                mClientListeners.size());
+    }
+
+    public void removeOnClientListChangedListener(OnClientListChanged listener) {
+        mClientListeners.remove(listener);
+        Log.v(TAG, "Removed a client list change listener, current length: " +
+                mClientListeners.size());
     }
 
     public ArrayList<ScoutClient> getClientList() {
@@ -143,26 +152,28 @@ public class ServerService extends Service {
 
     private void registerClient(ScoutClient client) {
         mClients.add(client);
-        if (mClientListener != null) {
-            mClientListener.onClientAdded(mClients.size() - 1);
+        for (OnClientListChanged listener : mClientListeners) {
+            listener.onClientAdded(mClients.size() - 1);
         }
     }
 
-    private void removeClient(int pos) {
+    public void removeClient(ScoutClient client) {
+        int pos = mClients.indexOf(client);
         mClients.remove(pos);
-        if (mClientListener != null) {
-            mClientListener.onClientRemoved(pos);
+        for (OnClientListChanged listener : mClientListeners) {
+            listener.onClientRemoved(pos);
         }
+    }
+
+    public interface OnClientListChanged {
+        void onClientAdded(int pos);
+
+        void onClientRemoved(int pos);
     }
 
     public class ServerBinder extends Binder {
         public ServerService getInstance() {
             return ServerService.this;
         }
-    }
-
-    public interface OnClientListChanged {
-        void onClientAdded(int pos);
-        void onClientRemoved(int pos);
     }
 }
