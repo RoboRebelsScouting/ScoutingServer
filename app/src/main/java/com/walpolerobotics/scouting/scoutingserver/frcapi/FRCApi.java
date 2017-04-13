@@ -35,15 +35,15 @@ public class FRCApi {
 
     public void downloadMatchFile(final String event, final String level,
                                   final MatchFileDownloadedCallback callback) {
-        new AsyncTask<Void, Void, JSONObject>() {
+        new AsyncTask<Void, Void, Schedule>() {
             @Override
-            protected JSONObject doInBackground(Void... params) {
-                return downloadMatchFile(event, level);
+            protected Schedule doInBackground(Void... params) {
+                return new Schedule(downloadMatchFile(event, level));
             }
 
             @Override
-            protected void onPostExecute(JSONObject result) {
-                callback.onMatchFileDownloaded(result);
+            protected void onPostExecute(Schedule schedule) {
+                callback.onMatchFileDownloaded(schedule);
             }
         }.execute();
     }
@@ -74,6 +74,6 @@ public class FRCApi {
     }
 
     public interface MatchFileDownloadedCallback {
-        void onMatchFileDownloaded(JSONObject file);
+        void onMatchFileDownloaded(Schedule schedule);
     }
 }
