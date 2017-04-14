@@ -30,7 +30,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View cardView = LayoutInflater.from(mContext)
-                .inflate(R.layout.list_device, parent, false);
+                .inflate(R.layout.list_view, parent, false);
 
         return new ViewHolder(cardView);
     }
@@ -88,7 +88,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
             primary = (TextView) itemView.findViewById(R.id.firstLine);
             secondary = (TextView) itemView.findViewById(R.id.secondLine);
-            stateIcon = (ImageView) itemView.findViewById(R.id.stateIcon);
+            stateIcon = (ImageView) itemView.findViewById(R.id.icon);
         }
     }
 }

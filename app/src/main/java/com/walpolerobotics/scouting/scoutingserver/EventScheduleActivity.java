@@ -3,22 +3,24 @@ package com.walpolerobotics.scouting.scoutingserver;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
+import com.walpolerobotics.scouting.scoutingserver.adapter.ScheduleFileAdapter;
 import com.walpolerobotics.scouting.scoutingserver.frcapi.FRCApi;
+import com.walpolerobotics.scouting.scoutingserver.frcapi.Schedule;
 
-import org.json.JSONObject;
+import java.util.ArrayList;
 
 public class EventScheduleActivity extends AppCompatActivity {
 
     private FRCApi mApi = new
             FRCApi("***REMOVED***");
 
-    private EditText mEventCodeInput;
-    private TextView mSchedulePreview;
+    private RecyclerView mList;
+    private ScheduleFileAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +38,19 @@ public class EventScheduleActivity extends AppCompatActivity {
             }
         });
 
-        mEventCodeInput = (EditText) findViewById(R.id.eventCode);
-        mSchedulePreview = (TextView) findViewById(R.id.previewMatchSchedule);
+        mList = (RecyclerView) findViewById(R.id.recyclerView);
+        mList.setLayoutManager(new LinearLayoutManager(this));
+        initListAdapter();
+    }
+
+    private void initListAdapter() {
+        // TODO: Actually read schedules from those saved in file system
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        mAdapter = new ScheduleFileAdapter(this, schedules);
+        mList.setAdapter(mAdapter);
     }
 
     public void actionDownload(View view) {
-        String eventCode = mEventCodeInput.getText().toString();
-        mApi.downloadMatchFile(eventCode, FRCApi.TOURNAMENT_LEVEL_QUALIFICATIONS,
-                new FRCApi.MatchFileDownloadedCallback() {
-            @Override
-            public void onMatchFileDownloaded(JSONObject file) {
-                mSchedulePreview.setText(file.toString());
-            }
-        });
+
     }
 }

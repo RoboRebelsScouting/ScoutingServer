@@ -1,6 +1,5 @@
 package com.walpolerobotics.scouting.scoutingserver.adapter;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,85 +9,52 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
-import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
+import com.walpolerobotics.scouting.scoutingserver.frcapi.Schedule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ScheduleFileAdapter extends RecyclerView.Adapter<ScheduleFileAdapter.ViewHolder> {
 
     private Context mContext;
-    private ArrayList<ScoutClient> mDevices;
-    private HashMap<ScoutClient, ScoutClient.ClientStateChangeListener> mStateListeners =
-            new HashMap<>();
+    private ArrayList<Schedule> mSchedules;
 
-    public ScheduleFileAdapter(Context context, ArrayList<ScoutClient> devices) {
+    public ScheduleFileAdapter(Context context, ArrayList<Schedule> schedules) {
         mContext = context;
-        mDevices = devices;
+        mSchedules = schedules;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View cardView = LayoutInflater.from(mContext)
-                .inflate(R.layout.list_device, parent, false);
+                .inflate(R.layout.list_view, parent, false);
 
         return new ViewHolder(cardView);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        final ScoutClient client = mDevices.get(position);
-        final BluetoothDevice device = client.getBluetoothDevice();
-        holder.primary.setText(device.getName());
-        holder.secondary.setText(device.getAddress());
-        switch (client.getState()) {
-            case ScoutClient.STATE_CONNECTED:
-                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
-                break;
-            case ScoutClient.STATE_DISCONNECTED:
-                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
-                break;
-        }
-        ScoutClient.ClientStateChangeListener listener = new ScoutClient
-                .ClientStateChangeListener() {
-
-            @Override
-            public void onConnected(ScoutClient client) {
-                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
-            }
-
-            @Override
-            public void onDisconnected(ScoutClient client) {
-                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
-            }
-        };
-        client.addClientStateChangeListener(listener);
-        mStateListeners.put(client, listener);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        Schedule schedule = mSchedules.get(position);
+        holder.primary.setText(schedule.getEventName());
+        holder.secondary.setText(schedule.getEventCode());
     }
 
     @Override
     public int getItemCount() {
-        return mDevices.size();
-    }
-
-    public void onDestroyView() {
-        for (ScoutClient client : mDevices) {
-            client.removeClientStateChangeListener(mStateListeners.get(client));
-        }
+        return mSchedules.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView primary;
         private TextView secondary;
-        private ImageView stateIcon;
+        private ImageView icon;
 
         private ViewHolder(View itemView) {
             super(itemView);
 
             primary = (TextView) itemView.findViewById(R.id.firstLine);
             secondary = (TextView) itemView.findViewById(R.id.secondLine);
-            stateIcon = (ImageView) itemView.findViewById(R.id.stateIcon);
+            icon = (ImageView) itemView.findViewById(R.id.icon);
         }
     }
 }
