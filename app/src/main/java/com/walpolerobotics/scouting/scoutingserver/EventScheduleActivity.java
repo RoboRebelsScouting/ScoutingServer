@@ -1,6 +1,7 @@
 package com.walpolerobotics.scouting.scoutingserver;
 
 import android.content.Intent;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.walpolerobotics.scouting.scoutingserver.adapter.ScheduleFileAdapter;
+import com.walpolerobotics.scouting.scoutingserver.dialog.DownloadScheduleDialog;
 import com.walpolerobotics.scouting.scoutingserver.frcapi.FRCApi;
 import com.walpolerobotics.scouting.scoutingserver.frcapi.Schedule;
 
@@ -51,6 +53,7 @@ public class EventScheduleActivity extends AppCompatActivity {
     }
 
     public void actionDownload(View view) {
-
+        FragmentManager fm = getSupportFragmentManager();
+        new DownloadScheduleDialog().show(fm, "downloadScheduleDialog");
     }
 }

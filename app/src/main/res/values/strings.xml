@@ -13,9 +13,13 @@
     <string name="notification_msg">Server is running</string>
     <string name="notification_action_stop">Stop Server</string>
 
+    <string name="match_quals">Qualifications</string>
+    <string name="match_playoff">Playoffs</string>
+
     <string name="input_event_code">Event Code</string>
     <string name="preview_match_schedule">Raw Match Schedule Preview</string>
 
+    <string name="dialog_download_schedule_title">Download Schedule</string>
     <string name="dialog_disconnected_title">Bluetooth Device Disconnected</string>
     <string name="dialog_disconnected_msg">The previously connected client &lt;b>%1$s&lt;/b>
     has disconnected.</string>
