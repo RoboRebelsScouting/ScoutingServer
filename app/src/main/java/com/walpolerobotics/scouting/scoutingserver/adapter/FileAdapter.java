@@ -77,7 +77,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     private File getFile(String pathName) {
         for (File file : mFiles) {
-            if (file.getPath().equals(pathName)) {
+            if (file.getName().equals(pathName)) {
                 return file;
             }
         }
