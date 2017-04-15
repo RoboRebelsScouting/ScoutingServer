@@ -3,6 +3,7 @@ package com.walpolerobotics.scouting.scoutingserver.fragment;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -37,6 +38,8 @@ public class FilesFragment extends Fragment implements ServerService.OnClientLis
 
         mList = (RecyclerView) view.findViewById(R.id.recyclerView);
         mList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mList.addItemDecoration(new DividerItemDecoration(getContext(),
+                DividerItemDecoration.VERTICAL));
         initListAdapter();
 
         return view;
@@ -45,8 +48,10 @@ public class FilesFragment extends Fragment implements ServerService.OnClientLis
     private void initListAdapter() {
         File parentDirectory = new File(Environment.getExternalStorageDirectory(),
                 ClientHandlerThread.FILE_WRITE_LOCATION);
-        mAdapter = new FileAdapter(getContext(), parentDirectory);
-        mList.setAdapter(mAdapter);
+        if (parentDirectory.exists() || parentDirectory.mkdirs()) {
+            mAdapter = new FileAdapter(getContext(), parentDirectory);
+            mList.setAdapter(mAdapter);
+        }
     }
 
     @Override

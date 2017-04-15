@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -71,6 +72,8 @@ public class DevicesFragment extends Fragment implements ServerService.OnClientL
 
         mList = (RecyclerView) view.findViewById(R.id.recyclerView);
         mList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mList.addItemDecoration(new DividerItemDecoration(getContext(),
+                DividerItemDecoration.VERTICAL));
         if (mService != null) {
             initListAdapter();
         }

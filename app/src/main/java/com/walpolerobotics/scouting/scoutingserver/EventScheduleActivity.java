@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -44,14 +45,17 @@ public class EventScheduleActivity extends AppCompatActivity {
 
         mList = (RecyclerView) findViewById(R.id.recyclerView);
         mList.setLayoutManager(new LinearLayoutManager(this));
+        mList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         initListAdapter();
     }
 
     private void initListAdapter() {
         File parentDirectory = new File(Environment.getExternalStorageDirectory(),
                 Schedule.FILE_WRITE_LOCATION);
-        mAdapter = new FileAdapter(this, parentDirectory);
-        mList.setAdapter(mAdapter);
+        if (parentDirectory.exists() || parentDirectory.mkdirs()) {
+            mAdapter = new FileAdapter(this, parentDirectory);
+            mList.setAdapter(mAdapter);
+        }
     }
 
     public void actionDownload(View view) {
