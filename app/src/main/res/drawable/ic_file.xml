@@ -11,7 +11,7 @@
         android:width="36dp"
         android:height="36dp"
         android:bottom="8dp"
-        android:drawable="@drawable/ic_date_range_white_24px"
+        android:drawable="@drawable/ic_insert_drive_file_white_24px"
         android:left="8dp"
         android:right="8dp"
         android:top="8dp" />

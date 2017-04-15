@@ -1,6 +1,7 @@
 package com.walpolerobotics.scouting.scoutingserver;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,11 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.walpolerobotics.scouting.scoutingserver.adapter.ScheduleFileAdapter;
+import com.walpolerobotics.scouting.scoutingserver.adapter.FileAdapter;
 import com.walpolerobotics.scouting.scoutingserver.dialog.DownloadScheduleDialog;
 import com.walpolerobotics.scouting.scoutingserver.frcapi.FRCApi;
 import com.walpolerobotics.scouting.scoutingserver.frcapi.Schedule;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class EventScheduleActivity extends AppCompatActivity {
@@ -22,7 +24,7 @@ public class EventScheduleActivity extends AppCompatActivity {
             FRCApi("***REMOVED***");
 
     private RecyclerView mList;
-    private ScheduleFileAdapter mAdapter;
+    private FileAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +48,9 @@ public class EventScheduleActivity extends AppCompatActivity {
     }
 
     private void initListAdapter() {
-        // TODO: Actually read schedules from those saved in file system
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        mAdapter = new ScheduleFileAdapter(this, schedules);
+        File parentDirectory = new File(Environment.getExternalStorageDirectory(),
+                Schedule.FILE_WRITE_LOCATION);
+        mAdapter = new FileAdapter(this, parentDirectory);
         mList.setAdapter(mAdapter);
     }
 

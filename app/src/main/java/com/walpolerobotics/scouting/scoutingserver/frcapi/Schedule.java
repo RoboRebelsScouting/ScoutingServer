@@ -15,7 +15,7 @@ import java.io.IOException;
 public class Schedule {
 
     private static final String TAG = "Schedule";
-    private static final String FILE_WRITE_LOCATION = "scouting/schedules";
+    public static final String FILE_WRITE_LOCATION = "scouting/schedules";
 
     private String mEventCode;
     private String mLevel;

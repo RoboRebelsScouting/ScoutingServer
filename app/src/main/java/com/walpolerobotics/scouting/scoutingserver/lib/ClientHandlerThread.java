@@ -174,7 +174,7 @@ public class ClientHandlerThread extends Thread {
                 File pathFile = new File(Environment.getExternalStorageDirectory(),
                         FILE_WRITE_LOCATION);
                 File writeFile = new File(pathFile, fileName);
-                if ((!pathFile.exists() && !pathFile.mkdir()) || (!writeFile.exists() &&
+                if ((!pathFile.exists() && !pathFile.mkdirs()) || (!writeFile.exists() &&
                         !writeFile.createNewFile())) {
                     // The file and/or directory does not exist and we couldn't instantiate it
                     Log.e(TAG, "Could not create new directory/file");
