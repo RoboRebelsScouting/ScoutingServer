@@ -19,7 +19,7 @@ public class ClientHandlerThread extends Thread {
 
     private static final String SOCKET_DISCONNECTED_MESSAGE = "bt socket closed, read return: -1";
 
-    private static final String FILE_WRITE_LOCATION = "scouting/match-files";
+    public static final String FILE_WRITE_LOCATION = "scouting/match-files";
     private static final int FILE_MAX_BYTE_SIZE = 16000;
 
     private static final short MESSAGE_FILE = 1;

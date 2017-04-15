@@ -22,22 +22,24 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     private static final String TAG = "FileAdapter";
 
     private Context mContext;
+    private File mParentDirectory;
     private ArrayList<File> mFiles = new ArrayList<>();
     private Handler mHandler;
     private FileObserver mObserver;
 
     public FileAdapter(Context context, File parentDirectory) {
         mContext = context;
+        mParentDirectory = parentDirectory;
         mHandler = new Handler(mContext.getMainLooper());
 
-        File[] files = parentDirectory.listFiles();
+        File[] files = mParentDirectory.listFiles();
         if (files != null) {
             Collections.addAll(mFiles, files);
         }
 
         int watchEvents = FileObserver.CREATE | FileObserver.DELETE | FileObserver.DELETE_SELF |
                 FileObserver.MOVED_FROM | FileObserver.MOVED_TO | FileObserver.MOVE_SELF;
-        mObserver = new FileObserver(parentDirectory.getPath(), watchEvents) {
+        mObserver = new FileObserver(mParentDirectory.getPath(), watchEvents) {
             @Override
             public void onEvent(final int event, final String path) {
                 mHandler.post(new Runnable() {
@@ -87,7 +89,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
             case FileObserver.CREATE:
             case FileObserver.MOVED_TO:
                 int newPos = mFiles.size();
-                File newFile = new File(pathName);
+                File newFile = new File(mParentDirectory, pathName);
                 mFiles.add(newFile);
                 notifyItemInserted(newPos);
                 break;

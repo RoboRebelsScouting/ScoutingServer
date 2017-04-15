@@ -44,9 +44,6 @@ public class DevicesFragment extends Fragment implements ServerService.OnClientL
         }
     };
 
-    public DevicesFragment() {
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +67,7 @@ public class DevicesFragment extends Fragment implements ServerService.OnClientL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_devices, container, false);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_list, container, false);
 
         mList = (RecyclerView) view.findViewById(R.id.recyclerView);
         mList.setLayoutManager(new LinearLayoutManager(getContext()));
