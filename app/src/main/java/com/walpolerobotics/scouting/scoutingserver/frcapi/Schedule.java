@@ -15,7 +15,7 @@ import java.io.IOException;
 public class Schedule {
 
     private static final String TAG = "Schedule";
-    private static final String FILE_WRITE_LOCATION = "Event-Schedules";
+    private static final String FILE_WRITE_LOCATION = "scouting/schedules";
 
     private String mEventCode;
     private String mLevel;
@@ -55,7 +55,7 @@ public class Schedule {
                 if (Environment.MEDIA_MOUNTED.equals(state)) {
                     try {
                         // External media is writable, go ahead and save the file
-                        String fileName = getEventCode() + "-Schedule";
+                        String fileName = getEventCode() + "-" + getType() + ".json";
 
                         JSONObject obj = new JSONObject();
                         obj.put("Schedule", mArray);
