@@ -66,13 +66,13 @@ public class Schedule {
                         File writeFile = new File(pathFile, fileName);
                         if ((!pathFile.exists() && !pathFile.mkdir()) || (!writeFile.exists() &&
                                 !writeFile.createNewFile())) {
+                            // The file and/or directory does not exist and we couldn't instantiate it
                             Log.e(TAG, "Could not create new directory/file");
-                            return null;
+                        } else {
+                            FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
+                            fileOutputStream.write(file);
+                            fileOutputStream.close();
                         }
-
-                        FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
-                        fileOutputStream.write(file);
-                        fileOutputStream.close();
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }

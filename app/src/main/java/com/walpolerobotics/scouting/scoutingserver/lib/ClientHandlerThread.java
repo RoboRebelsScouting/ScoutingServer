@@ -176,14 +176,16 @@ public class ClientHandlerThread extends Thread {
                 File writeFile = new File(pathFile, fileName);
                 if ((!pathFile.exists() && !pathFile.mkdir()) || (!writeFile.exists() &&
                         !writeFile.createNewFile())) {
+                    // The file and/or directory does not exist and we couldn't instantiate it
+                    Log.e(TAG, "Could not create new directory/file");
                     ClientHandlerTask task = new ClientHandlerTask();
                     task.fileName = fileName;
                     mClient.handleEvent(task, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
+                } else {
+                    FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
+                    fileOutputStream.write(file);
+                    fileOutputStream.close();
                 }
-
-                FileOutputStream fileOutputStream = new FileOutputStream(writeFile);
-                fileOutputStream.write(file);
-                fileOutputStream.close();
             } else {
                 Log.e(TAG, "Cannot write to external storage");
                 mClient.handleEvent(null, ClientHandlerTask.EVENT_FILE_ERROR_EXTERNAL);
