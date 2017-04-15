@@ -1,5 +1,9 @@
 package com.walpolerobotics.scouting.scoutingserver.frcapi;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Match {
 
     public static final int RED_1 = 0;
@@ -9,45 +13,51 @@ public class Match {
     public static final int BLUE_2 = 4;
     public static final int BLUE_3 = 5;
 
-    private int mNumber;
-    private int[] mRobots = new int[6];
+    private JSONObject mObject;
 
-    public Match(int number, int red1, int red2, int red3, int blue1, int blue2, int blue3) {
-        mNumber = number;
-
-        mRobots[RED_1] = red1;
-        mRobots[RED_2] = red2;
-        mRobots[RED_3] = red3;
-        mRobots[BLUE_1] = blue1;
-        mRobots[BLUE_2] = blue2;
-        mRobots[BLUE_3] = blue3;
+    public Match(JSONObject in) {
+        mObject = in;
     }
 
     public int getNumber() {
-        return mNumber;
+        try {
+            return mObject.getInt("matchNumber");
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Could not parse JSONObject");
+        }
+    }
+
+    public int getRobot(int pos) {
+        try {
+            JSONArray teams = mObject.getJSONArray("Teams");
+            JSONObject team = teams.getJSONObject(pos);
+            return team.getInt("teamNumber");
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Could not parse JSONObject");
+        }
     }
 
     public int getRed1() {
-        return mRobots[RED_1];
+        return getRobot(RED_1);
     }
 
     public int getRed2() {
-        return mRobots[RED_2];
+        return getRobot(RED_2);
     }
 
     public int getRed3() {
-        return mRobots[RED_3];
+        return getRobot(RED_3);
     }
 
     public int getBlue1() {
-        return mRobots[BLUE_1];
+        return getRobot(BLUE_1);
     }
 
     public int getBlue2() {
-        return mRobots[BLUE_2];
+        return getRobot(BLUE_2);
     }
 
     public int getBlue3() {
-        return mRobots[BLUE_3];
+        return getRobot(BLUE_3);
     }
 }

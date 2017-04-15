@@ -54,6 +54,8 @@ public class EventScheduleActivity extends AppCompatActivity {
 
     public void actionDownload(View view) {
         FragmentManager fm = getSupportFragmentManager();
-        new DownloadScheduleDialog().show(fm, "downloadScheduleDialog");
+        DownloadScheduleDialog dialog = new DownloadScheduleDialog();
+        dialog.setFRCApi(mApi);
+        dialog.show(fm, "downloadScheduleDialog");
     }
 }

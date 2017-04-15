@@ -17,12 +17,15 @@
     <RadioGroup
         android:id="@+id/matchTypeInput"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/radioQuals">
         <RadioButton
+            android:id="@+id/radioQuals"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/match_quals" />
         <RadioButton
+            android:id="@+id/radioPlayoffs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/match_playoff" />

@@ -34,8 +34,7 @@ public class ScheduleFileAdapter extends RecyclerView.Adapter<ScheduleFileAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Schedule schedule = mSchedules.get(position);
-        holder.primary.setText(schedule.getEventName());
-        holder.secondary.setText(schedule.getEventCode());
+        holder.primary.setText(schedule.getEventCode());
     }
 
     @Override

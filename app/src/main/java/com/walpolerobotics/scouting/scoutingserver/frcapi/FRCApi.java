@@ -1,6 +1,7 @@
 package com.walpolerobotics.scouting.scoutingserver.frcapi;
 
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
 import org.json.JSONException;
@@ -14,6 +15,8 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 public class FRCApi {
+
+    private static final int STATUS_OK = 200;
 
     private static final String SEASON = "2017";
 
@@ -38,18 +41,19 @@ public class FRCApi {
         new AsyncTask<Void, Void, Schedule>() {
             @Override
             protected Schedule doInBackground(Void... params) {
-                return new Schedule(downloadMatchFile(event, level));
+                return downloadScheduleFile(event, level);
             }
 
             @Override
-            protected void onPostExecute(Schedule schedule) {
+            protected void onPostExecute(@Nullable Schedule schedule) {
                 callback.onMatchFileDownloaded(schedule);
             }
         }.execute();
     }
 
     @WorkerThread
-    private JSONObject downloadMatchFile(String event, String level) {
+    @Nullable
+    private Schedule downloadScheduleFile(String event, String level) {
         try {
             String matchSchedule = "/schedule/" + event + "?tournamentLevel=" + level;
             URL url = new URL(API_BASE + matchSchedule);
@@ -66,7 +70,12 @@ public class FRCApi {
             }
             in.close();
 
-            return new JSONObject(response.toString());
+            int responseCode = conn.getResponseCode();
+            if (responseCode == STATUS_OK) {
+                return new Schedule(event, level, new JSONObject(response.toString()));
+            } else {
+                return null;
+            }
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return null;
