@@ -12,11 +12,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
+import com.walpolerobotics.scouting.scoutingserver.util.SortableArrayList;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
@@ -24,11 +26,19 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     private Context mContext;
     private File mParentDirectory;
-    private ArrayList<File> mFiles = new ArrayList<>();
+    private SortableArrayList<File> mFiles = new SortableArrayList<>();
     private Handler mHandler;
     private String[] mExtensions;
     // FileObserver must be a member variable to prevent it from being garbage collected by the VM
     private FileObserver mObserver;
+    private Comparator<File> mFileComparator = new Comparator<File>() {
+        @Override
+        public int compare(File o1, File o2) {
+            Date do1 = new Date(o1.lastModified());
+            Date do2 = new Date(o2.lastModified());
+            return do1.compareTo(do2);
+        }
+    };
 
     public FileAdapter(Context context, File parentDirectory, String[] extensions) {
         mContext = context;
@@ -44,6 +54,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         });
         if (files != null) {
             Collections.addAll(mFiles, files);
+            Collections.sort(mFiles, mFileComparator);
         }
 
         int watchEvents = FileObserver.CREATE | FileObserver.DELETE | FileObserver.DELETE_SELF |
@@ -123,10 +134,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         switch (event) {
             case FileObserver.CREATE:
             case FileObserver.MOVED_TO:
-                int newPos = mFiles.size();
                 File newFile = new File(mParentDirectory, pathName);
-                mFiles.add(newFile);
-                notifyItemInserted(newPos);
+                notifyItemInserted(mFiles.add(newFile, mFileComparator));
                 break;
             case FileObserver.DELETE:
             case FileObserver.MOVED_FROM:
