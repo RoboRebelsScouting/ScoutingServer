@@ -36,7 +36,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         public int compare(File o1, File o2) {
             Date do1 = new Date(o1.lastModified());
             Date do2 = new Date(o2.lastModified());
-            return do1.compareTo(do2);
+            return do2.compareTo(do1);
         }
     };
 
