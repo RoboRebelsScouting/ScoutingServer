@@ -24,7 +24,6 @@ public class EventScheduleActivity extends AppCompatActivity {
             FRCApi("***REMOVED***");
 
     private RecyclerView mList;
-    private FileAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +51,9 @@ public class EventScheduleActivity extends AppCompatActivity {
         File parentDirectory = new File(Environment.getExternalStorageDirectory(),
                 Schedule.FILE_WRITE_LOCATION);
         if (parentDirectory.exists() || parentDirectory.mkdirs()) {
-            mAdapter = new FileAdapter(this, parentDirectory);
-            mList.setAdapter(mAdapter);
+            String[] extensions = {"json"};
+            FileAdapter adapter = new FileAdapter(this, parentDirectory, extensions);
+            mList.setAdapter(adapter);
         }
     }
 

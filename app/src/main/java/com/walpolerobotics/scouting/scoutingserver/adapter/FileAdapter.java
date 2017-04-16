@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.walpolerobotics.scouting.scoutingserver.R;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -25,14 +26,22 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     private File mParentDirectory;
     private ArrayList<File> mFiles = new ArrayList<>();
     private Handler mHandler;
+    private String[] mExtensions;
+    // FileObserver must be a member variable to prevent it from being garbage collected by the VM
     private FileObserver mObserver;
 
-    public FileAdapter(Context context, File parentDirectory) {
+    public FileAdapter(Context context, File parentDirectory, String[] extensions) {
         mContext = context;
         mParentDirectory = parentDirectory;
         mHandler = new Handler(mContext.getMainLooper());
+        mExtensions = extensions;
 
-        File[] files = mParentDirectory.listFiles();
+        File[] files = mParentDirectory.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return acceptFileExtension(name);
+            }
+        });
         if (files != null) {
             Collections.addAll(mFiles, files);
         }
@@ -46,7 +55,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
                     @Override
                     public void run() {
                         Log.v(TAG, "File Event: " + event + ", File Path: " + path);
-                        onFileChange(event, path);
+                        if (acceptFileExtension(path)) {
+                            onFileChange(event, path);
+                        }
                     }
                 });
             }
@@ -73,6 +84,30 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return mFiles.size();
+    }
+
+    private String getFileExtension(String name) {
+        int i = name.lastIndexOf('.');
+        if (i > 0) {
+            return name.substring(i + 1);
+        } else {
+            return "";
+        }
+    }
+
+    private boolean acceptFileExtension(String name) {
+        if (mExtensions == null || mExtensions.length == 0) {
+            return true;
+        }
+
+        String extension = getFileExtension(name);
+
+        for (String test : mExtensions) {
+            if (extension.equalsIgnoreCase(test)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private File getFile(String pathName) {

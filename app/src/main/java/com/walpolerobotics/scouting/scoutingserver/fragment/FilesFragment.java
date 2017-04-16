@@ -11,20 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
-import com.walpolerobotics.scouting.scoutingserver.ServerService;
 import com.walpolerobotics.scouting.scoutingserver.adapter.FileAdapter;
 import com.walpolerobotics.scouting.scoutingserver.lib.ClientHandlerThread;
 
 import java.io.File;
 
-public class FilesFragment extends Fragment implements ServerService.OnClientListChanged {
+public class FilesFragment extends Fragment {
 
     public static final int POSITION = 1;
     public static final String FRAGMENT_TITLE = "Files";
     private static final String TAG = "FilesFragment";
 
     private RecyclerView mList;
-    private FileAdapter mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,18 +47,9 @@ public class FilesFragment extends Fragment implements ServerService.OnClientLis
         File parentDirectory = new File(Environment.getExternalStorageDirectory(),
                 ClientHandlerThread.FILE_WRITE_LOCATION);
         if (parentDirectory.exists() || parentDirectory.mkdirs()) {
-            mAdapter = new FileAdapter(getContext(), parentDirectory);
-            mList.setAdapter(mAdapter);
+            String[] extensions = {"csv"};
+            FileAdapter adapter = new FileAdapter(getContext(), parentDirectory, extensions);
+            mList.setAdapter(adapter);
         }
-    }
-
-    @Override
-    public void onClientAdded(int pos) {
-        mAdapter.notifyItemInserted(pos);
-    }
-
-    @Override
-    public void onClientRemoved(int pos) {
-        mAdapter.notifyItemRemoved(pos);
     }
 }
