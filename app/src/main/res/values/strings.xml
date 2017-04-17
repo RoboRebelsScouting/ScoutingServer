@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Scouting Server</string>
-    <string name="activity_schedule">Manage Event Schedules</string>
+    <string name="activity_home">Home</string>
+    <string name="activity_schedule">Schedules</string>
 
     <string name="menu_search">Accept Connections</string>
     <string name="menu_schedule">Manage Match Schedules</string>

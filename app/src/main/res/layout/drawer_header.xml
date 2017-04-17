@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="178dp"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/drawerImage"
+        android:layout_width="match_parent"
+        android:layout_height="178dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/drawer_header"
+        tools:ignore="ContentDescription" />
+</RelativeLayout>
