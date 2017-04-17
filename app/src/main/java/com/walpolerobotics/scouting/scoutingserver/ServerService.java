@@ -118,14 +118,10 @@ public class ServerService extends Service {
 
     public void addOnClientListChangedListener(OnClientListChanged listener) {
         mClientListeners.add(listener);
-        Log.v(TAG, "Added a client list change listener, current length: " +
-                mClientListeners.size());
     }
 
     public void removeOnClientListChangedListener(OnClientListChanged listener) {
         mClientListeners.remove(listener);
-        Log.v(TAG, "Removed a client list change listener, current length: " +
-                mClientListeners.size());
     }
 
     public ArrayList<ScoutClient> getClientList() {

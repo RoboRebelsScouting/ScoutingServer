@@ -21,7 +21,7 @@ import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
 
-public class DevicesFragment extends Fragment implements ServerService.OnClientListChanged {
+public class DevicesFragment extends Fragment {
 
     public static final int POSITION = 0;
     public static final String FRAGMENT_TITLE = "Devices";
@@ -86,26 +86,16 @@ public class DevicesFragment extends Fragment implements ServerService.OnClientL
         super.onDestroyView();
 
         if (mService != null) {
-            mService.removeOnClientListChangedListener(this);
+            mService.removeOnClientListChangedListener(mAdapter);
         }
 
-        mAdapter.onDestroyView();
+        mAdapter.unregisterListeners();
     }
 
     private void initListAdapter() {
         ArrayList<ScoutClient> clients = mService.getClientList();
         mAdapter = new DeviceAdapter(getContext(), clients);
-        mService.addOnClientListChangedListener(this);
+        mService.addOnClientListChangedListener(mAdapter);
         mList.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onClientAdded(int pos) {
-        mAdapter.notifyItemInserted(pos);
-    }
-
-    @Override
-    public void onClientRemoved(int pos) {
-        mAdapter.notifyItemRemoved(pos);
     }
 }

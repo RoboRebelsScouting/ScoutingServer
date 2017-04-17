@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements ScoutClient.Clien
 
             ArrayList<ScoutClient> clients = mService.getClientList();
             for (ScoutClient client : clients) {
+                // Set a listener for all of the already connected clients so we can notify if they
+                // disconnect
                 client.addClientStateChangeListener(MainActivity.this);
             }
         }
@@ -200,17 +202,17 @@ public class MainActivity extends AppCompatActivity implements ScoutClient.Clien
                 .getName());
         mDialogs.put(client, dialog);
         FragmentManager fm = getSupportFragmentManager();
-        dialog.show(fm, "deviceDisconnectedDialog");
+        dialog.show(fm, "deviceDisconnectedDialog+" + device.getAddress());
     }
 
     @Override
     public void onClientAdded(int pos) {
+        // Set a listener when a new client connects so we can notify if they disconnect
         ScoutClient client = mService.getClientList().get(pos);
         client.addClientStateChangeListener(this);
     }
 
     @Override
     public void onClientRemoved(int pos) {
-
     }
 }

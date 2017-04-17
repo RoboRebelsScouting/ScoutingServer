@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
 import com.walpolerobotics.scouting.scoutingserver.ServerService;
@@ -145,14 +144,10 @@ public class ScoutClient {
 
     public void addClientStateChangeListener(ClientStateChangeListener listener) {
         mStateListeners.add(listener);
-        Log.v(TAG, "Added a client state change listener, current length: " +
-                mStateListeners.size());
     }
 
     public void removeClientStateChangeListener(ClientStateChangeListener listener) {
         mStateListeners.remove(listener);
-        Log.v(TAG, "Removed a client state change listener, current length: " +
-                mStateListeners.size());
     }
 
     public void setScoutListener(ScoutNameChangeListener listener) {

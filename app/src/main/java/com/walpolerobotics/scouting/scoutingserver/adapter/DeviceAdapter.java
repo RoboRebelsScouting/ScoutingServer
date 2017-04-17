@@ -10,21 +10,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.walpolerobotics.scouting.scoutingserver.R;
+import com.walpolerobotics.scouting.scoutingserver.ServerService;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
+public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> implements
+        ServerService.OnClientListChanged, ScoutClient.ClientStateChangeListener {
 
     private Context mContext;
     private ArrayList<ScoutClient> mDevices;
-    private HashMap<ScoutClient, ScoutClient.ClientStateChangeListener> mStateListeners =
-            new HashMap<>();
 
     public DeviceAdapter(Context context, ArrayList<ScoutClient> devices) {
         mContext = context;
         mDevices = devices;
+        for (ScoutClient client : mDevices) {
+            client.addClientStateChangeListener(this);
+        }
     }
 
     @Override
@@ -49,21 +51,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
                 holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
                 break;
         }
-        ScoutClient.ClientStateChangeListener listener = new ScoutClient
-                .ClientStateChangeListener() {
-
-            @Override
-            public void onConnected(ScoutClient client) {
-                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_connected);
-            }
-
-            @Override
-            public void onDisconnected(ScoutClient client) {
-                holder.stateIcon.setImageResource(R.drawable.ic_bluetooth_status_disconnected);
-            }
-        };
-        client.addClientStateChangeListener(listener);
-        mStateListeners.put(client, listener);
     }
 
     @Override
@@ -71,10 +58,34 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         return mDevices.size();
     }
 
-    public void onDestroyView() {
+    public void unregisterListeners() {
         for (ScoutClient client : mDevices) {
-            client.removeClientStateChangeListener(mStateListeners.get(client));
+            client.removeClientStateChangeListener(this);
         }
+    }
+
+    @Override
+    public void onClientAdded(int pos) {
+        notifyItemInserted(pos);
+        ScoutClient client = mDevices.get(pos);
+        client.addClientStateChangeListener(this);
+    }
+
+    @Override
+    public void onClientRemoved(int pos) {
+        notifyItemRemoved(pos);
+    }
+
+    @Override
+    public void onConnected(ScoutClient client) {
+        int pos = mDevices.indexOf(client);
+        notifyItemChanged(pos);
+    }
+
+    @Override
+    public void onDisconnected(ScoutClient client) {
+        int pos = mDevices.indexOf(client);
+        notifyItemChanged(pos);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
