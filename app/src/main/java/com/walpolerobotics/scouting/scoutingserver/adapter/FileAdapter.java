@@ -66,7 +66,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
                     @Override
                     public void run() {
                         Log.v(TAG, "File Event: " + event + ", File Path: " + path);
-                        if (acceptFileExtension(path)) {
+                        if (path == null || acceptFileExtension(path)) {
                             onFileChange(event, path);
                         }
                     }
