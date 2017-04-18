@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -28,7 +29,6 @@ import com.walpolerobotics.scouting.scoutingserver.dialog.NoBluetoothSupportDial
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements ScoutClient.ClientStateChangeListener,
         ServerService.OnClientListChanged {
@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements ScoutClient.Clien
     private boolean bluetoothSetup = false;
 
     private ServerService mService;
-    private HashMap<ScoutClient, DeviceDisconnectedDialog> mDialogs = new HashMap<>();
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceDisconnected(ComponentName name) {
@@ -214,7 +213,9 @@ public class MainActivity extends AppCompatActivity implements ScoutClient.Clien
 
     @Override
     public void onConnected(ScoutClient client) {
-        DeviceDisconnectedDialog dialog = mDialogs.get(client);
+        FragmentManager fm = getSupportFragmentManager();
+        String tag = "deviceDisconnectedDialog+" + client.getBluetoothDevice().getAddress();
+        DialogFragment dialog = (DialogFragment) fm.findFragmentByTag(tag);
         if (dialog != null) {
             dialog.dismiss();
         }
@@ -225,7 +226,6 @@ public class MainActivity extends AppCompatActivity implements ScoutClient.Clien
         BluetoothDevice device = client.getBluetoothDevice();
         DeviceDisconnectedDialog dialog = DeviceDisconnectedDialog.createDialog(device
                 .getName());
-        mDialogs.put(client, dialog);
         FragmentManager fm = getSupportFragmentManager();
         dialog.show(fm, "deviceDisconnectedDialog+" + device.getAddress());
     }

@@ -175,7 +175,7 @@ public class ScoutClient {
     }
 
     public void setNewBluetoothSocket(BluetoothSocket socket) {
-        disconnect();
+        mThread.stopLoop();
         initHandlerThread(socket);
     }
 
