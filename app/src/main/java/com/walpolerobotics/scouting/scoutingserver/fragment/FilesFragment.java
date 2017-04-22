@@ -1,8 +1,11 @@
 package com.walpolerobotics.scouting.scoutingserver.fragment;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +19,7 @@ import com.walpolerobotics.scouting.scoutingserver.lib.ClientHandlerThread;
 
 import java.io.File;
 
-public class FilesFragment extends Fragment {
+public class FilesFragment extends Fragment implements FileAdapter.OnFileSelectedListener {
 
     public static final int POSITION = 1;
     public static final String FRAGMENT_TITLE = "Files";
@@ -49,7 +52,18 @@ public class FilesFragment extends Fragment {
         if (parentDirectory.exists() || parentDirectory.mkdirs()) {
             String[] extensions = {"csv"};
             FileAdapter adapter = new FileAdapter(getContext(), parentDirectory, extensions);
+            adapter.setOnFileSelectedListener(this);
             mList.setAdapter(adapter);
         }
+    }
+
+    @Override
+    public void onFileSelected(int pos, File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri uri = FileProvider.getUriForFile(getContext(),
+                "com.walpolerobotics.scouting.scoutingserver.provider", file);
+        intent.setDataAndType(uri, "text/*");
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
     }
 }

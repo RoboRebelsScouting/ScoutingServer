@@ -3,7 +3,6 @@ package com.walpolerobotics.scouting.scoutingserver.adapter;
 import android.content.Context;
 import android.os.FileObserver;
 import android.os.Handler;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 
-public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
+public class FileAdapter extends ClickAdapter<FileAdapter.ViewHolder> {
 
     private static final String TAG = "FileAdapter";
 
@@ -39,6 +38,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
             return do2.compareTo(do1);
         }
     };
+    private OnFileSelectedListener mSelectedListener;
 
     public FileAdapter(Context context, File parentDirectory, String[] extensions) {
         mContext = context;
@@ -80,8 +80,10 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View cardView = LayoutInflater.from(mContext)
                 .inflate(R.layout.list_view, parent, false);
+        ViewHolder holder = new ViewHolder(cardView);
+        holder.attachFileListener(mSelectedListener);
 
-        return new ViewHolder(cardView);
+        return holder;
     }
 
     @Override
@@ -95,6 +97,10 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return mFiles.size();
+    }
+
+    public void setOnFileSelectedListener(OnFileSelectedListener listener) {
+        mSelectedListener = listener;
     }
 
     private String getFileExtension(String name) {
@@ -152,11 +158,16 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public interface OnFileSelectedListener {
+        void onFileSelected(int pos, File file);
+    }
+
+    class ViewHolder extends ClickAdapter.ClickViewHolder {
 
         private TextView primary;
         private TextView secondary;
         private ImageView icon;
+        private OnFileSelectedListener mSelectedListener;
 
         private ViewHolder(View itemView) {
             super(itemView);
@@ -164,6 +175,18 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
             primary = (TextView) itemView.findViewById(R.id.firstLine);
             secondary = (TextView) itemView.findViewById(R.id.secondLine);
             icon = (ImageView) itemView.findViewById(R.id.icon);
+        }
+
+        private void attachFileListener(OnFileSelectedListener listener) {
+            mSelectedListener = listener;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mSelectedListener != null) {
+                File file = mFiles.get(getAdapterPosition());
+                mSelectedListener.onFileSelected(getAdapterPosition(), file);
+            }
         }
     }
 }
