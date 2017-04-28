@@ -23,7 +23,9 @@ public class ScoutClient {
     public static final int POSITION_3 = 2;
     public static final int STATE_CONNECTED = 0;
     public static final int STATE_DISCONNECTED = 1;
+
     private static final String TAG = "ScoutClient";
+
     private final BluetoothDevice mDevice;
     private ServerService mParentService;
     private ClientHandlerThread mThread;
