@@ -6,6 +6,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Binder;
+import android.os.Environment;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -15,8 +17,12 @@ import android.util.Log;
 
 import com.walpolerobotics.scouting.scoutingserver.lib.ClientAcceptTask;
 import com.walpolerobotics.scouting.scoutingserver.lib.ClientAcceptThread;
+import com.walpolerobotics.scouting.scoutingserver.lib.ClientHandlerThread;
+import com.walpolerobotics.scouting.scoutingserver.lib.Match;
+import com.walpolerobotics.scouting.scoutingserver.lib.MatchFile;
 import com.walpolerobotics.scouting.scoutingserver.lib.ScoutClient;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ServerService extends Service {
@@ -28,6 +34,12 @@ public class ServerService extends Service {
 
     private ArrayList<ScoutClient> mClients = new ArrayList<>();
     private ArrayList<OnClientListChanged> mClientListeners = new ArrayList<>();
+
+    private File mParentDirectory = new File(Environment.getExternalStorageDirectory(),
+    ClientHandlerThread.FILE_WRITE_LOCATION);
+    private FileObserver mObserver;
+    private ArrayList<Match> mMatches = new ArrayList<>();
+    private ArrayList<MatchUpdateListener> mMatchListeners = new ArrayList<>();
 
     private ClientAcceptThread mAcceptThread;
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -47,6 +59,20 @@ public class ServerService extends Service {
     };
 
     public ServerService() {
+        int watchEvents = FileObserver.CREATE | FileObserver.DELETE | FileObserver.DELETE_SELF |
+                FileObserver.MOVED_FROM | FileObserver.MOVED_TO | FileObserver.MOVE_SELF;
+        mObserver = new FileObserver(mParentDirectory.getPath(), watchEvents) {
+            @Override
+            public void onEvent(final int event, final String path) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.v(TAG, "File Event: " + event + ", File Path: " + path);
+                        onFileChange(event, path);
+                    }
+                });
+            }
+        };
     }
 
 
@@ -109,6 +135,43 @@ public class ServerService extends Service {
         }
     }
 
+    private void onFileChange(int event, String pathName) {
+        switch (event) {
+            case FileObserver.CREATE:
+            case FileObserver.MOVED_TO:
+                MatchFile newFile = new MatchFile(mParentDirectory, pathName);
+                // Look to see if this file belongs to an already existing match, if so add it
+                int pos = 0;
+                for (Match match : mMatches) {
+                    if (match.getMatchNumber() == newFile.getMatchNumber()) {
+                        match.addMatchFile(newFile);
+                        for (MatchUpdateListener listener : mMatchListeners) {
+                            listener.onMatchUpdated(pos);
+                        }
+                        return;
+                    }
+                    pos++;
+                }
+                // The file does not belong to an already existing match, create a new match and
+                // add it to that match
+                Match newMatch = new Match(newFile.getMatchNumber());
+                newMatch.addMatchFile(newFile);
+                mMatches.add(newMatch);
+                for (MatchUpdateListener listener : mMatchListeners) {
+                    listener.onNewMatchCreated(mMatches.size() - 1);
+                }
+                break;
+            case FileObserver.DELETE:
+            case FileObserver.MOVED_FROM:
+                // TODO: What to do if a file is removed from directory?
+                break;
+            case FileObserver.DELETE_SELF:
+            case FileObserver.MOVE_SELF:
+                // TODO: What to do if directory is removed?
+                break;
+        }
+    }
+
     public void searchForDevices() {
         if (mAcceptThread == null || !mAcceptThread.isAlive()) {
             mAcceptThread = new ClientAcceptThread(this);
@@ -163,8 +226,12 @@ public class ServerService extends Service {
 
     public interface OnClientListChanged {
         void onClientAdded(int pos);
-
         void onClientRemoved(int pos);
+    }
+
+    public interface MatchUpdateListener {
+        void onNewMatchCreated(int pos);
+        void onMatchUpdated(int pos);
     }
 
     public class ServerBinder extends Binder {

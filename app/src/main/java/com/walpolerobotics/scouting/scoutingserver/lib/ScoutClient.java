@@ -197,7 +197,6 @@ public class ScoutClient {
 
     public interface ClientStateChangeListener {
         void onConnected(ScoutClient client);
-
         void onDisconnected(ScoutClient client);
     }
 
